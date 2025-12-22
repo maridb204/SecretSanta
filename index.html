@@ -1,0 +1,979 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>กล่องสุ่มของขวัญ (เลขผู้เล่น = เลขของขวัญ)</title>
+  <style>
+    :root{
+      --bg1:#070b1a; --bg2:#0c1838;
+      --card: rgba(255,255,255,.07);
+      --bd: rgba(255,255,255,.14);
+      --txt:#e9ecf7; --mut:rgba(233,236,247,.78);
+      --gold:#ffd54a; --danger:#ff5c7a; --ok:#55e5a1;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; color:var(--txt);
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, "Noto Sans Thai", sans-serif;
+      background: radial-gradient(1100px 600px at 20% 10%, #1a2d6d 0%, transparent 60%),
+                  radial-gradient(900px 500px at 80% 20%, #5b1b5c 0%, transparent 60%),
+                  linear-gradient(160deg, var(--bg1), var(--bg2));
+      min-height:100vh;
+    }
+    .wrap{max-width:1100px; margin:0 auto; padding:18px; display:grid; gap:14px;}
+    .top{
+      display:flex; flex-wrap:wrap; gap:10px; align-items:center; justify-content:space-between;
+      padding:14px 16px; border-radius:18px; background:var(--card); border:1px solid var(--bd);
+      backdrop-filter: blur(10px);
+    }
+    .title{font-weight:900; font-size:20px; display:flex; gap:10px; align-items:center;}
+    .pill{
+      padding:8px 12px; border:1px solid var(--bd); border-radius:999px;
+      background: rgba(255,255,255,.06); color:var(--mut); font-size:13px;
+    }
+
+    .grid{display:grid; grid-template-columns: 1.1fr .9fr; gap:14px;}
+    @media (max-width: 900px){ .grid{grid-template-columns:1fr;} }
+
+    .card{
+      border-radius:18px; background:var(--card); border:1px solid var(--bd);
+      backdrop-filter: blur(10px);
+      padding:14px;
+    }
+
+    .row{display:flex; flex-wrap:wrap; gap:10px; align-items:center;}
+    label{color:var(--mut)}
+    input, button{
+      border-radius:14px; border:1px solid rgba(255,255,255,.18);
+      background: rgba(255,255,255,.06); color:var(--txt);
+      padding:10px 12px; font-size:16px;
+      outline:none;
+    }
+    input{width:160px}
+    button{cursor:pointer; font-weight:900}
+    button.primary{
+      border-color: rgba(255,213,74,.35);
+      background: linear-gradient(180deg, rgba(255,213,74,.22), rgba(255,213,74,.10));
+    }
+    button.danger{
+      border-color: rgba(255,92,122,.40);
+      background: linear-gradient(180deg, rgba(255,92,122,.22), rgba(255,92,122,.10));
+    }
+    button.ghost{
+      border-color: rgba(255,255,255,.18);
+      background: rgba(255,255,255,.06);
+    }
+    button:disabled{opacity:.5; cursor:not-allowed}
+
+    /* Gift box scene */
+    .scene{
+      position:relative;
+      min-height:520px;
+      display:grid;
+      place-items:center;
+      overflow:hidden;
+      border-radius:16px;
+      border:1px dashed rgba(255,255,255,.12);
+      background:
+        radial-gradient(600px 280px at 50% 30%, rgba(255,213,74,.14), transparent 65%),
+        radial-gradient(420px 220px at 30% 70%, rgba(85,229,161,.10), transparent 60%),
+        radial-gradient(520px 260px at 70% 80%, rgba(255,92,122,.10), transparent 60%),
+        rgba(255,255,255,.03);
+    }
+    .sparkle{
+      position:absolute; inset:-40px;
+      background: radial-gradient(circle at 10% 20%, rgba(255,255,255,.10), transparent 22%),
+                  radial-gradient(circle at 80% 30%, rgba(255,255,255,.08), transparent 18%),
+                  radial-gradient(circle at 40% 70%, rgba(255,255,255,.06), transparent 18%),
+                  radial-gradient(circle at 65% 55%, rgba(255,255,255,.06), transparent 18%);
+      filter: blur(0.5px);
+      opacity:.65;
+      animation: float 8s ease-in-out infinite;
+      pointer-events:none;
+    }
+    @keyframes float{ 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+
+    .boxWrap{
+      position:relative;
+      width:min(420px, 86vw);
+      aspect-ratio: 1 / 1;
+      display:grid;
+      place-items:center;
+    }
+
+    .glowBeam{
+      position:absolute;
+      width: 70%;
+      height: 70%;
+      border-radius: 50%;
+      background: radial-gradient(circle at 50% 60%,
+        rgba(255,213,74,.0) 0%,
+        rgba(255,213,74,.0) 35%,
+        rgba(255,213,74,.65) 55%,
+        rgba(255,213,74,.0) 74%);
+      opacity:0;
+      transform: translateY(18px) scale(0.8);
+      filter: blur(1px);
+      pointer-events:none;
+    }
+
+    .giftBox{
+      position:relative;
+      width: 64%;
+      height: 48%;
+      transform: translateY(30px);
+      filter: drop-shadow(0 22px 26px rgba(0,0,0,.35));
+    }
+    .base{
+      position:absolute; inset:0;
+      border-radius: 18px;
+      background: linear-gradient(180deg, rgba(255,92,122,.92), rgba(255,92,122,.62));
+      border: 1px solid rgba(255,255,255,.18);
+      overflow:hidden;
+    }
+    .ribbonV{
+      position:absolute; left:50%; top:-2%;
+      width: 14%;
+      height: 104%;
+      transform: translateX(-50%);
+      border-radius: 12px;
+      background: linear-gradient(180deg, rgba(255,213,74,.95), rgba(255,213,74,.60));
+      box-shadow: inset 0 0 0 1px rgba(0,0,0,.10);
+    }
+    .ribbonH{
+      position:absolute; left:-2%; top:50%;
+      width: 104%;
+      height: 16%;
+      transform: translateY(-50%);
+      border-radius: 12px;
+      background: linear-gradient(180deg, rgba(255,213,74,.95), rgba(255,213,74,.60));
+      box-shadow: inset 0 0 0 1px rgba(0,0,0,.10);
+    }
+    .lid{
+      position:absolute;
+      width: 110%;
+      height: 40%;
+      left: -5%;
+      top: -30%;
+      border-radius: 18px;
+      background: linear-gradient(180deg, rgba(255,92,122,.98), rgba(255,92,122,.70));
+      border: 1px solid rgba(255,255,255,.18);
+      transform-origin: 15% 90%;
+      transform: rotate(0deg) translateY(0);
+      filter: drop-shadow(0 10px 14px rgba(0,0,0,.25));
+    }
+    .lid:before{
+      content:"";
+      position:absolute; inset:0;
+      background: linear-gradient(90deg, rgba(255,255,255,.00), rgba(255,255,255,.18), rgba(255,255,255,.00));
+      opacity:.24;
+      border-radius:18px;
+    }
+    .bow{
+      position:absolute;
+      left: 18%;
+      top: -18%;
+      width: 26%;
+      height: 26%;
+      transform: rotate(-10deg);
+      filter: drop-shadow(0 10px 10px rgba(0,0,0,.18));
+    }
+    .bow:before, .bow:after{
+      content:"";
+      position:absolute;
+      width: 55%;
+      height: 45%;
+      top: 20%;
+      border-radius: 999px 999px 999px 0;
+      background: linear-gradient(180deg, rgba(255,213,74,.98), rgba(255,213,74,.62));
+      border:1px solid rgba(0,0,0,.08);
+    }
+    .bow:before{ left: 0; transform: rotate(-18deg); }
+    .bow:after{ right: 0; transform: rotate(18deg) scaleX(-1); }
+    .knot{
+      position:absolute; left:50%; top:42%;
+      width: 26%;
+      height: 26%;
+      transform: translate(-50%,-50%);
+      border-radius: 10px;
+      background: linear-gradient(180deg, rgba(255,213,74,.98), rgba(255,213,74,.70));
+      border:1px solid rgba(0,0,0,.10);
+    }
+
+    .numberInside{
+      position:absolute;
+      left:50%;
+      top: 38%;
+      transform: translate(-50%, 60px) scale(.85);
+      width: 82%;
+      padding: 12px 10px;
+      border-radius: 16px;
+      background: rgba(10,15,35,.45);
+      border: 1px solid rgba(255,255,255,.16);
+      backdrop-filter: blur(10px);
+      text-align:center;
+      opacity:0;
+      pointer-events:none;
+      z-index: 2;
+    }
+    .numberInside .cap{ color:var(--mut); font-size:13px; }
+    .numberInside .num{
+      font-size:56px; font-weight:950; letter-spacing:1px;
+      text-shadow: 0 10px 28px rgba(0,0,0,.55);
+      margin-top: 2px;
+    }
+    .numberInside .cap2{ color:var(--mut); font-size:12px; margin-top:4px; }
+
+    #confetti{ position:absolute; inset:0; pointer-events:none; }
+
+    .shaking .giftBox{ animation: shake .6s ease-in-out infinite; }
+    @keyframes shake{
+      0%,100%{ transform: translateY(30px) rotate(0deg); }
+      25%{ transform: translateY(30px) rotate(-1.6deg); }
+      50%{ transform: translateY(30px) rotate(1.6deg); }
+      75%{ transform: translateY(30px) rotate(-1.2deg); }
+    }
+    .opening .lid{ animation: openLid 900ms cubic-bezier(.18,.88,.22,1) forwards; }
+    @keyframes openLid{
+      0%{ transform: rotate(0deg) translateY(0); }
+      70%{ transform: rotate(-48deg) translateY(-8px); }
+      100%{ transform: rotate(-62deg) translateY(-10px); }
+    }
+    .opening .glowBeam{ animation: glowUp 1100ms ease-out forwards; }
+    @keyframes glowUp{
+      0%{ opacity:0; transform: translateY(18px) scale(.80); }
+      45%{ opacity:1; transform: translateY(0px) scale(1.08); }
+      100%{ opacity:.85; transform: translateY(-6px) scale(1.02); }
+    }
+    .showResult .numberInside{
+      opacity:1;
+      transform: translate(-50%, -10px) scale(1);
+      transition: 520ms cubic-bezier(.18,.95,.18,1);
+    }
+
+    .hint{font-size:14px; color:var(--mut); line-height:1.5}
+    .stat{display:grid; gap:10px; margin-top:10px;}
+    .kpi{display:flex; align-items:baseline; justify-content:space-between; gap:10px;}
+    .kpi .n{font-size:22px; font-weight:900}
+    .kpi .t{color:var(--mut)}
+    .nums{display:flex; flex-wrap:wrap; gap:6px}
+
+    /* pills */
+    .numPill{
+      padding:6px 10px; border-radius:999px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.05);
+      font-size:13px;
+      user-select:none;
+      transition: transform 120ms ease, background 120ms ease, border-color 120ms ease;
+    }
+    .numPill.clickable{ cursor:pointer; }
+    .numPill.clickable:hover{ transform: translateY(-1px) scale(1.03); border-color: rgba(255,255,255,.26); }
+    .numPill.active{
+      border-color: rgba(255,213,74,.55);
+      background: rgba(255,213,74,.14);
+      box-shadow: 0 10px 26px rgba(0,0,0,.25);
+    }
+    .numPill.gone{opacity:.45; text-decoration:line-through; cursor:not-allowed}
+
+    .msg{margin-top:8px; color:var(--gold); min-height: 22px;}
+    .ok{color:var(--ok)}
+
+    /* --- Modal base --- */
+    .modalOverlay{
+      position:fixed; inset:0;
+      background: rgba(0,0,0,.55);
+      display:none;
+      place-items:center;
+      padding: 18px;
+      z-index: 9999;
+    }
+    .modalOverlay.show{ display:grid; }
+    .modal{
+      width: min(600px, 96vw);
+      border-radius: 18px;
+      background: rgba(12, 16, 40, .78);
+      border: 1px solid rgba(255,255,255,.18);
+      backdrop-filter: blur(14px);
+      box-shadow: 0 30px 80px rgba(0,0,0,.55);
+      padding: 14px;
+      transform: translateY(8px) scale(.98);
+      animation: pop 180ms ease-out forwards;
+    }
+    @keyframes pop{ to { transform: translateY(0) scale(1); } }
+    .modalHeader{
+      display:flex; justify-content:space-between; align-items:center; gap:12px;
+      padding: 8px 8px 12px;
+    }
+    .modalTitle{ font-weight:950; font-size:18px; }
+    .xBtn{
+      width:40px; height:40px; border-radius:12px;
+      border:1px solid rgba(255,255,255,.18);
+      background: rgba(255,255,255,.06);
+      cursor:pointer; color:var(--txt); font-weight:900;
+    }
+    .modalBody{ padding: 0 8px 10px; color: var(--mut); line-height: 1.55; }
+    .modalFooter{
+      display:flex; gap:10px; justify-content:flex-end; padding: 10px 8px 8px;
+      flex-wrap:wrap;
+    }
+    .warnBox{
+      margin-top: 10px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,92,122,.35);
+      background: rgba(255,92,122,.10);
+      color: rgba(255,220,230,.95);
+      font-size: 14px;
+    }
+    .tiny{ font-size: 12px; opacity: .85; }
+
+    /* player setup pills */
+    .setupGrid{ margin-top:10px; display:flex; flex-wrap:wrap; gap:8px; }
+    .pickPill{
+      padding:8px 12px; border-radius:999px;
+      border:1px solid rgba(255,255,255,.16);
+      background: rgba(255,255,255,.06);
+      cursor:pointer;
+      user-select:none;
+      font-weight:800;
+      transition: transform 120ms ease, background 120ms ease, border-color 120ms ease;
+    }
+    .pickPill:hover{ transform: translateY(-1px) scale(1.02); border-color: rgba(255,255,255,.28); }
+    .pickPill.on{
+      border-color: rgba(85,229,161,.45);
+      background: rgba(85,229,161,.14);
+      box-shadow: 0 14px 30px rgba(0,0,0,.30);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <div class="top">
+      <div class="title">🎁 กล่องสุ่มของขวัญ</div>
+      <div class="pill">กติกา: “เลขผู้ร่วมเล่น” = “เลขของขวัญทั้งหมด” (ชุดเดียวกัน) • ห้ามได้เลขตัวเอง</div>
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <div class="scene" id="scene">
+          <div class="sparkle"></div>
+          <canvas id="confetti"></canvas>
+
+          <div class="boxWrap">
+            <div class="glowBeam" id="glow"></div>
+
+            <div class="giftBox" id="giftBox">
+              <div class="numberInside" id="numberInside">
+                <div class="cap">🎉 คุณได้ของขวัญหมายเลข</div>
+                <div class="num" id="resultText">—</div>
+                <div class="cap2" id="capLine2">—</div>
+              </div>
+
+              <div class="lid">
+                <div class="bow"><div class="knot"></div></div>
+              </div>
+
+              <div class="base">
+                <div class="ribbonV"></div>
+                <div class="ribbonH"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="hint" style="margin-top:10px">
+          เริ่มต้นต้องเลือกผู้ร่วมเล่นก่อน → เลือกเลขผู้เล่น → เปิดกล่องสุ่ม → กด “ลบเลขนี้ออก” เพื่อยืนยัน (ลบ “เลขของขวัญ” + ล็อก “เลขผู้เล่น”)
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="row">
+          <label>เลขผู้เล่น:</label>
+          <input id="playerId" type="number" min="1" max="30" inputmode="numeric" placeholder="คลิกเลือกจากรายการด้านล่าง" />
+          <button id="setupBtn" class="ghost">ตั้งค่าผู้เล่น</button>
+          <button id="resetBtn" class="danger">รีเซ็ตระบบ</button>
+        </div>
+
+        <div class="row" style="margin-top:10px">
+          <button id="openBtn" class="primary">📦 เปิดกล่องสุ่ม</button>
+          <button id="removeBtn" class="danger" disabled>❌ ลบเลขนี้ออก</button>
+        </div>
+
+        <div class="msg" id="msg"></div>
+
+        <div class="stat">
+          <div class="kpi">
+            <div class="t">ของขวัญที่ยังเหลือ</div>
+            <div class="n" id="remainCount">0</div>
+          </div>
+
+          <div class="kpi">
+            <div class="t">ผู้เล่นที่ร่วมเล่น</div>
+            <div class="n" id="joinCount">0</div>
+          </div>
+
+          <div>
+            <div class="t" style="margin-bottom:6px">ผู้ร่วมเล่น (คลิกเลือกผู้เล่นได้ / ขีดทับ = เล่นแล้ว)</div>
+            <div class="nums" id="playerPills"></div>
+          </div>
+
+          <div>
+            <div class="t" style="margin-bottom:6px">เลขของขวัญทั้งหมด (ชุดเดียวกับผู้ร่วมเล่น)</div>
+            <div class="nums" id="giftPills"></div>
+          </div>
+
+          <div class="kpi" style="margin-top:4px">
+            <div class="t">ผู้เล่นที่เล่นแล้ว</div>
+            <div class="n" id="usedCount">0</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Player Setup Modal -->
+  <div class="modalOverlay" id="setupOverlay" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="setupTitle">
+      <div class="modalHeader">
+        <div class="modalTitle" id="setupTitle">👥 เลือกเลขผู้เล่นที่ร่วมเล่น</div>
+        <button class="xBtn" id="setupCloseBtn" title="ปิด">✕</button>
+      </div>
+      <div class="modalBody">
+        <div class="tiny">
+          เลือกเลขที่จะ “ร่วมเล่น” → ระบบจะตั้ง <b>เลขของขวัญทั้งหมด = ชุดเลขเดียวกัน</b> (จำนวนเท่ากัน 100%)<br>
+          ต้องเลือกอย่างน้อย <b>2</b> คน
+        </div>
+
+        <div class="setupGrid" id="setupGrid"></div>
+
+        <div class="warnBox" id="setupWarn" style="display:none;">
+          ต้องเลือกผู้เล่นอย่างน้อย <b>2</b> คน
+        </div>
+      </div>
+      <div class="modalFooter">
+        <button class="ghost" id="setupSelectAll">เลือกทั้งหมด</button>
+        <button class="ghost" id="setupClearAll">ล้างทั้งหมด</button>
+        <button class="primary" id="setupStartBtn" disabled>เริ่มเกมด้วยชุดที่เลือก</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reset Confirm Modal -->
+  <div class="modalOverlay" id="resetOverlay" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="resetTitle">
+      <div class="modalHeader">
+        <div class="modalTitle" id="resetTitle">⚠️ ยืนยันการรีเซ็ตระบบ</div>
+        <button class="xBtn" id="resetCloseBtn" title="ปิด">✕</button>
+      </div>
+      <div class="modalBody">
+        รีเซ็ตจะ:
+        <ul>
+          <li>ล้างผลการสุ่ม / ของขวัญที่ถูกเอาไปแล้ว / ผู้เล่นที่เล่นแล้ว</li>
+          <li><b>ล้างผู้ร่วมเล่น</b> (ต้องเลือกใหม่)</li>
+        </ul>
+
+        <div class="warnBox">
+          เพื่อป้องกันกดพลาด: พิมพ์คำว่า <b>RESET</b> แล้วค่อยกด “รีเซ็ตตอนนี้”
+        </div>
+
+        <div style="margin-top:12px; display:grid; gap:8px;">
+          <label for="resetText" class="tiny">พิมพ์ RESET เพื่อยืนยัน</label>
+          <input id="resetText" type="text" placeholder="พิมพ์ RESET" autocomplete="off" />
+          <div class="tiny">ตัวพิมพ์ใหญ่/เล็กไม่สำคัญ</div>
+        </div>
+      </div>
+      <div class="modalFooter">
+        <button class="ghost" id="resetCancelBtn">ยกเลิก</button>
+        <button class="danger" id="resetConfirmBtn" disabled>รีเซ็ตตอนนี้</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+(() => {
+  const N = 30;
+
+  // ✅ ตอนยังไม่ตั้งค่า: ไม่มีของขวัญและผู้ร่วมเล่น
+  let joinedPlayers = [];    // ชุดเลขผู้ร่วมเล่น
+  let availableGifts = [];   // ✅ ชุดเลขของขวัญ = joinedPlayers ที่ยังไม่ถูกเอาไป
+  let removedGifts = [];     // ของขวัญที่ถูกเอาไปแล้ว
+  let usedPlayers  = [];     // ผู้เล่นที่เล่นแล้ว
+
+  let lastGift = null;
+  let lastPlayer = null;
+  let busy = false;
+
+  // DOM
+  const scene = document.getElementById("scene");
+  const playerInput = document.getElementById("playerId");
+  const openBtn = document.getElementById("openBtn");
+  const removeBtn = document.getElementById("removeBtn");
+  const resetBtn = document.getElementById("resetBtn");
+  const setupBtn = document.getElementById("setupBtn");
+  const msgEl = document.getElementById("msg");
+
+  const remainEl = document.getElementById("remainCount");
+  const usedCountEl = document.getElementById("usedCount");
+  const joinCountEl = document.getElementById("joinCount");
+
+  const playerPillsEl = document.getElementById("playerPills");
+  const giftPillsEl = document.getElementById("giftPills");
+
+  const resultText = document.getElementById("resultText");
+  const capLine2 = document.getElementById("capLine2");
+
+  // Setup modal
+  const setupOverlay = document.getElementById("setupOverlay");
+  const setupCloseBtn = document.getElementById("setupCloseBtn");
+  const setupGrid = document.getElementById("setupGrid");
+  const setupStartBtn = document.getElementById("setupStartBtn");
+  const setupSelectAll = document.getElementById("setupSelectAll");
+  const setupClearAll = document.getElementById("setupClearAll");
+  const setupWarn = document.getElementById("setupWarn");
+  let setupSelection = new Set();
+
+  // Reset modal
+  const resetOverlay = document.getElementById("resetOverlay");
+  const resetCloseBtn = document.getElementById("resetCloseBtn");
+  const resetCancelBtn = document.getElementById("resetCancelBtn");
+  const resetConfirmBtn = document.getElementById("resetConfirmBtn");
+  const resetText = document.getElementById("resetText");
+
+  // Confetti
+  const conf = document.getElementById("confetti");
+  const cctx = conf.getContext("2d");
+  let confettiPieces = [];
+  let confettiRAF = null;
+
+  function resizeConfetti(){
+    const r = scene.getBoundingClientRect();
+    conf.width = Math.floor(r.width * devicePixelRatio);
+    conf.height = Math.floor(r.height * devicePixelRatio);
+  }
+  window.addEventListener("resize", resizeConfetti);
+  resizeConfetti();
+
+  function setBusy(v){
+    busy = v;
+    if (v) openBtn.disabled = true;
+    playerInput.disabled = v;
+    resetBtn.disabled = v;
+    setupBtn.disabled = v;
+  }
+
+  function setMsg(text, ok=false){
+    msgEl.textContent = text || "";
+    msgEl.className = "msg" + (ok ? " ok" : "");
+  }
+
+  function isPlayerJoined(id){ return joinedPlayers.includes(id); }
+  function isPlayerUsed(id){ return usedPlayers.includes(id); }
+
+  function clampPlayerId(){
+    const raw = playerInput.value;
+    if (raw === "") return NaN;
+
+    let v = Number(raw);
+    if(!Number.isFinite(v)) return NaN;
+    v = Math.max(1, Math.min(N, Math.floor(v)));
+
+    // ต้องอยู่ในชุดผู้ร่วมเล่น
+    if (!isPlayerJoined(v)) { playerInput.value = ""; return NaN; }
+    // และต้องยังไม่เล่น
+    if (isPlayerUsed(v)) { playerInput.value = ""; return NaN; }
+
+    playerInput.value = String(v);
+    return v;
+  }
+
+  function highlightActivePlayerPill(playerId){
+    const pills = playerPillsEl.querySelectorAll(".numPill");
+    pills.forEach(p => p.classList.remove("active"));
+    if (!Number.isFinite(playerId)) return;
+    const target = Array.from(pills).find(p => Number(p.dataset.num) === playerId);
+    if (target) target.classList.add("active");
+  }
+
+  function updatePlayerValidityUI(){
+    if (busy) return false;
+
+    if (joinedPlayers.length < 2){
+      setMsg("กรุณากด “ตั้งค่าผู้เล่น” แล้วเลือกผู้ร่วมเล่นอย่างน้อย 2 คน", false);
+      openBtn.disabled = true;
+      removeBtn.disabled = true;
+      highlightActivePlayerPill(null);
+      return false;
+    }
+
+    const v = clampPlayerId();
+    if (!Number.isFinite(v)) {
+      setMsg("เลือกเลขผู้เล่นจากรายการ “ผู้ร่วมเล่น” ที่ยังไม่เล่น (คลิกจากด้านล่าง)", false);
+      openBtn.disabled = true;
+      removeBtn.disabled = true;
+      highlightActivePlayerPill(null);
+      return false;
+    }
+
+    openBtn.disabled = false;
+    highlightActivePlayerPill(v);
+    return true;
+  }
+
+  function validGiftPool(playerId){
+    // ✅ ของขวัญทั้งหมด = ชุดเลขเดียวกับผู้ร่วมเล่น (availableGifts)
+    // ✅ ห้ามได้ของตัวเอง
+    return availableGifts.filter(g => g !== playerId);
+  }
+
+  function setResult(giftNo, playerNo){
+    lastGift = giftNo;
+    lastPlayer = playerNo;
+
+    resultText.textContent = (giftNo == null) ? "—" : String(giftNo);
+
+    if (giftNo == null || playerNo == null){
+      removeBtn.disabled = true;
+      scene.classList.remove("showResult");
+      capLine2.textContent = "—";
+    } else {
+      removeBtn.disabled = false;
+      scene.classList.add("showResult");
+      capLine2.textContent = `สำหรับผู้เล่นหมายเลข ${playerNo}`;
+    }
+  }
+
+  // Confetti
+  function spawnConfetti(){
+    const w = conf.width, h = conf.height;
+    const count = 120;
+    confettiPieces = Array.from({length:count}, () => {
+      const x = Math.random() * w;
+      const y = -Math.random() * h * 0.2;
+      const size = (6 + Math.random()*10) * devicePixelRatio;
+      const speed = (2.2 + Math.random()*4.0) * devicePixelRatio;
+      const drift = (-1 + Math.random()*2) * devicePixelRatio;
+      const rot = Math.random() * Math.PI*2;
+      const rotSp = (-0.15 + Math.random()*0.3);
+      const hue = Math.floor(Math.random()*360);
+      return {x,y,size,speed,drift,rot,rotSp,hue};
+    });
+  }
+  function drawConfetti(){
+    const w = conf.width, h = conf.height;
+    cctx.clearRect(0,0,w,h);
+
+    let alive = false;
+    for(const p of confettiPieces){
+      p.y += p.speed;
+      p.x += p.drift;
+      p.rot += p.rotSp;
+      if(p.y < h + 80) alive = true;
+
+      cctx.save();
+      cctx.translate(p.x, p.y);
+      cctx.rotate(p.rot);
+      cctx.fillStyle = `hsl(${p.hue} 90% 60% / 0.95)`;
+      cctx.fillRect(-p.size/2, -p.size/3, p.size, p.size*0.66);
+      cctx.restore();
+    }
+
+    if(alive){
+      confettiRAF = requestAnimationFrame(drawConfetti);
+    }else{
+      cctx.clearRect(0,0,w,h);
+      confettiPieces = [];
+      confettiRAF = null;
+    }
+  }
+  function fireConfetti(){
+    if(confettiRAF) cancelAnimationFrame(confettiRAF);
+    spawnConfetti();
+    confettiRAF = requestAnimationFrame(drawConfetti);
+  }
+
+  function resetBoxVisual(){
+    scene.classList.remove("shaking","opening","showResult");
+    void scene.offsetHeight;
+  }
+  function wait(ms){ return new Promise(r=>setTimeout(r, ms)); }
+
+  async function openSequence(giftNo, playerNo){
+    resetBoxVisual();
+    setResult(null, null);
+
+    scene.classList.add("shaking");
+    await wait(650);
+
+    scene.classList.remove("shaking");
+    scene.classList.add("opening");
+    await wait(900);
+
+    setResult(giftNo, playerNo);
+    fireConfetti();
+    setMsg(`สุ่มได้ของขวัญหมายเลข ${giftNo} (ผู้เล่น ${playerNo}) 🎉`, true);
+  }
+
+  async function doOpen(){
+    if (busy) return;
+    if (!updatePlayerValidityUI()) return;
+
+    const playerId = clampPlayerId();
+    setMsg("");
+
+    const pool = validGiftPool(playerId);
+    if(pool.length === 0){
+      setResult(null, null);
+      setMsg("ตอนนี้สุ่มไม่ได้แล้ว (เหลือแต่เลขของตัวเองในของขวัญที่ยังอยู่)", false);
+      openBtn.disabled = true;
+      return;
+    }
+
+    const pickedGift = pool[Math.floor(Math.random()*pool.length)];
+
+    setBusy(true);
+    try{ await openSequence(pickedGift, playerId); }
+    finally{
+      setBusy(false);
+      updatePlayerValidityUI();
+    }
+  }
+
+  // ✅ ปุ่มนี้ยืนยัน: ลบ “เลขของขวัญ” + ล็อก “เลขผู้เล่น”
+  function doRemove(){
+    if(busy) return;
+    if(lastGift == null || lastPlayer == null) return;
+
+    const giftNo = lastGift;
+    const playerNo = lastPlayer;
+
+    if(!availableGifts.includes(giftNo)){
+      setMsg("เลขของขวัญนี้ถูกเอาไปแล้ว");
+      return;
+    }
+
+    availableGifts = availableGifts.filter(v=>v!==giftNo);
+    removedGifts.push(giftNo);
+
+    if (!usedPlayers.includes(playerNo)) usedPlayers.push(playerNo);
+
+    setResult(null, null);
+    renderPills();
+    setMsg(`ยืนยันแล้ว ✅ ผู้เล่น ${playerNo} ได้ของขวัญหมายเลข ${giftNo}`, true);
+    updatePlayerValidityUI();
+  }
+
+  function renderPills(){
+    remainEl.textContent = String(availableGifts.length);
+    usedCountEl.textContent = String(usedPlayers.length);
+    joinCountEl.textContent = String(joinedPlayers.length);
+
+    // players: show joined set only
+    playerPillsEl.innerHTML = "";
+    const joinedSet = new Set(joinedPlayers);
+    const usedSet = new Set(usedPlayers);
+
+    joinedPlayers.forEach(i => {
+      const s = document.createElement("span");
+      const canPick = !usedSet.has(i);
+      s.className = "numPill" + (canPick ? " clickable" : " gone");
+      s.textContent = i;
+      s.dataset.num = String(i);
+
+      if (canPick){
+        s.title = "คลิกเพื่อเลือกเป็นเลขผู้เล่น";
+        s.addEventListener("click", () => {
+          if (busy) return;
+          playerInput.value = String(i);
+          setResult(null, null);
+          resetBoxVisual();
+          updatePlayerValidityUI();
+        });
+      } else {
+        s.title = "ผู้เล่นนี้เล่นแล้ว";
+      }
+      playerPillsEl.appendChild(s);
+    });
+
+    // gifts: show SAME joined set; strike out removed
+    giftPillsEl.innerHTML = "";
+    const availGiftSet = new Set(availableGifts);
+    joinedPlayers.forEach(i => {
+      const s = document.createElement("span");
+      const isAvail = availGiftSet.has(i);
+      s.className = "numPill" + (isAvail ? "" : " gone");
+      s.textContent = i;
+      s.title = isAvail ? "ของขวัญยังอยู่" : "ของขวัญถูกเอาไปแล้ว";
+      giftPillsEl.appendChild(s);
+    });
+
+    const v = Number(playerInput.value);
+    highlightActivePlayerPill(Number.isFinite(v) && joinedSet.has(v) && !usedSet.has(v) ? v : null);
+  }
+
+  // --- Setup modal ---
+  function openSetupModal(force=false){
+    if (busy) return;
+    setupSelection = new Set(joinedPlayers.length ? joinedPlayers : []);
+    buildSetupGrid();
+    setupOverlay.classList.add("show");
+    setupOverlay.setAttribute("aria-hidden","false");
+    setupCloseBtn.style.visibility = force ? "hidden" : "visible";
+    updateSetupStartState();
+  }
+
+  function closeSetupModal(){
+    setupOverlay.classList.remove("show");
+    setupOverlay.setAttribute("aria-hidden","true");
+    setupCloseBtn.style.visibility = "visible";
+  }
+
+  function buildSetupGrid(){
+    setupGrid.innerHTML = "";
+    for(let i=1;i<=N;i++){
+      const p = document.createElement("div");
+      p.className = "pickPill" + (setupSelection.has(i) ? " on" : "");
+      p.textContent = i;
+      p.addEventListener("click", () => {
+        if (setupSelection.has(i)) setupSelection.delete(i);
+        else setupSelection.add(i);
+        p.classList.toggle("on");
+        updateSetupStartState();
+      });
+      setupGrid.appendChild(p);
+    }
+  }
+
+  function updateSetupStartState(){
+    const count = setupSelection.size;
+    setupWarn.style.display = (count >= 2) ? "none" : "block";
+    setupStartBtn.disabled = count < 2;
+  }
+
+  function applySetupPlayers(){
+    // ✅ ตั้งชุดร่วมเล่น
+    joinedPlayers = Array.from(setupSelection).sort((a,b)=>a-b);
+
+    // ✅ รีสตาร์ทเกมให้สอดคล้อง: ของขวัญ = ชุดเดียวกัน และจำนวนเท่ากัน
+    availableGifts = joinedPlayers.slice(); // ของขวัญทั้งหมด = joinedPlayers
+    removedGifts = [];
+    usedPlayers = [];
+
+    // เคลียร์ผล/ช่องกรอก
+    playerInput.value = "";
+    setResult(null, null);
+    resetBoxVisual();
+
+    renderPills();
+    updatePlayerValidityUI();
+    setMsg(`ตั้งค่าแล้ว ✅ ผู้ร่วมเล่น ${joinedPlayers.length} คน และของขวัญ ${joinedPlayers.length} ชิ้น`, true);
+  }
+
+  // --- Reset modal ---
+  function openResetModal(){
+    if (busy) return;
+    resetText.value = "";
+    resetConfirmBtn.disabled = true;
+    resetOverlay.classList.add("show");
+    resetOverlay.setAttribute("aria-hidden","false");
+    setTimeout(() => resetText.focus(), 0);
+  }
+  function closeResetModal(){
+    resetOverlay.classList.remove("show");
+    resetOverlay.setAttribute("aria-hidden","true");
+    resetText.value = "";
+    resetConfirmBtn.disabled = true;
+  }
+  function applyResetNow(){
+    joinedPlayers = [];
+    availableGifts = [];
+    removedGifts = [];
+    usedPlayers = [];
+    playerInput.value = "";
+    setResult(null, null);
+    renderPills();
+    resetBoxVisual();
+    updatePlayerValidityUI();
+    setMsg("รีเซ็ตเรียบร้อย ✅ (กรุณาเลือกผู้ร่วมเล่นใหม่)", true);
+    openSetupModal(true);
+  }
+
+  // Events
+  openBtn.addEventListener("click", doOpen);
+  removeBtn.addEventListener("click", doRemove);
+
+  setupBtn.addEventListener("click", () => openSetupModal(false));
+
+  // Setup modal buttons
+  setupCloseBtn.addEventListener("click", closeSetupModal);
+  setupOverlay.addEventListener("click", (e) => {
+    if (e.target === setupOverlay && setupCloseBtn.style.visibility !== "hidden") closeSetupModal();
+  });
+  setupSelectAll.addEventListener("click", () => {
+    setupSelection = new Set(Array.from({length:N}, (_,i)=>i+1));
+    buildSetupGrid();
+    updateSetupStartState();
+  });
+  setupClearAll.addEventListener("click", () => {
+    setupSelection = new Set();
+    buildSetupGrid();
+    updateSetupStartState();
+  });
+  setupStartBtn.addEventListener("click", () => {
+    applySetupPlayers();
+    closeSetupModal();
+  });
+
+  resetBtn.addEventListener("click", openResetModal);
+  resetCloseBtn.addEventListener("click", closeResetModal);
+  resetCancelBtn.addEventListener("click", closeResetModal);
+  resetOverlay.addEventListener("click", (e) => {
+    if (e.target === resetOverlay) closeResetModal();
+  });
+  resetText.addEventListener("input", () => {
+    const ok = resetText.value.trim().toUpperCase() === "RESET";
+    resetConfirmBtn.disabled = !ok;
+  });
+  resetText.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && !resetConfirmBtn.disabled) {
+      e.preventDefault();
+      resetConfirmBtn.click();
+    }
+    if (e.key === "Escape") {
+      e.preventDefault();
+      closeResetModal();
+    }
+  });
+  resetConfirmBtn.addEventListener("click", () => {
+    closeResetModal();
+    applyResetNow();
+  });
+
+  // typing player id -> validate
+  playerInput.addEventListener("input", () => {
+    if (busy) return;
+    setResult(null, null);
+    resetBoxVisual();
+    updatePlayerValidityUI();
+  });
+
+  // Global ESC closes modals
+  document.addEventListener("keydown", (e) => {
+    if (e.key !== "Escape") return;
+    if (resetOverlay.classList.contains("show")) { e.preventDefault(); closeResetModal(); }
+    else if (setupOverlay.classList.contains("show") && setupCloseBtn.style.visibility !== "hidden") { e.preventDefault(); closeSetupModal(); }
+  });
+
+  // Init
+  renderPills();
+  setResult(null, null);
+  updatePlayerValidityUI();
+
+  // Force choose players before start
+  openSetupModal(true);
+})();
+</script>
+</body>
+</html>
