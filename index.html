@@ -237,7 +237,7 @@
     }
     .numberInside .cap2{ color:var(--mut); font-size:12px; margin-top:4px; }
 
-    #confetti{ position:absolute; inset:0; pointer-events:none; z-index:10000; }
+    #confetti{ position:absolute; inset:0; pointer-events:none; z-index:1; }
 
     .shaking .giftBox{ animation: shake .6s ease-in-out infinite; }
     @keyframes shake{
@@ -1080,7 +1080,11 @@
       // keep full-screen reveal (3s) before closing
       await wait(3000);
       overlay.classList.remove('show');
-      // do not toggle busy here; caller controls busy state
+      // hide confetti after overlay closes
+      cctx.clearRect(0, 0, conf.width, conf.height);
+      confettiPieces = [];
+      if (confettiRAF) cancelAnimationFrame(confettiRAF);
+      confettiRAF = null;
     }catch(e){}
   }
 
