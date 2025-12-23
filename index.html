@@ -381,18 +381,41 @@
       background: rgba(85,229,161,.14);
       box-shadow: 0 14px 30px rgba(0,0,0,.30);
     }
-    /* Fullscreen fake-draw overlay */
+    /* Fullscreen fake-draw overlay (more colorful, iPad-friendly) */
     #randomOverlay{
       position:fixed; inset:0; display:none; align-items:center; justify-content:center;
-      background: rgba(0,0,0,0.92); z-index:9999; color:var(--txt);
-      font-family: inherit;
+      background: linear-gradient(180deg, rgba(6,12,20,0.96), rgba(4,48,28,0.92));
+      z-index:9999; color:var(--txt);
+      font-family: inherit; padding:24px;
     }
     #randomOverlay.show{ display:flex; }
     #randomOverlay .randomBox{
-      text-align:center; padding:28px; border-radius:18px; backdrop-filter: blur(6px);
+      text-align:center; padding:36px 28px; border-radius:20px; backdrop-filter: blur(8px);
+      border: 1px solid rgba(255,255,255,0.06);
+      box-shadow: 0 40px 120px rgba(0,0,0,0.6), 0 8px 30px rgba(0,0,0,0.4);
+      width: min(820px, 92vw);
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
     }
-    #randomOverlay .num{ font-size: 140px; font-weight: 900; line-height:1; letter-spacing:4px; }
-    #randomOverlay .sub{ margin-top:18px; color:var(--mut); font-size:20px }
+    #randomOverlay .num{
+      font-size: 180px; font-weight: 900; line-height:1; letter-spacing:6px;
+      background: linear-gradient(90deg, var(--accent-gold), var(--accent-red) 40%, var(--accent-green) 80%);
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+      text-shadow: 0 20px 30px rgba(0,0,0,0.6), 0 4px 10px rgba(0,0,0,0.4);
+    }
+    #randomOverlay .sub{ margin-top:18px; color:var(--mut); font-size:20px; font-weight:700 }
+
+    /* iPad / tablet sizing */
+    @media (min-width:768px) and (max-width:1024px){
+      #randomOverlay .num{ font-size: 220px; }
+      #randomOverlay .sub{ font-size:24px; }
+      #randomOverlay .randomBox{ padding:48px 36px; }
+    }
+    /* small screens */
+    @media (max-width:480px){
+      #randomOverlay .num{ font-size: 84px; letter-spacing:2px; }
+      #randomOverlay .randomBox{ padding:18px; width:90vw; }
+      #randomOverlay .sub{ font-size:14px; }
+    }
   </style>
 </head>
 
