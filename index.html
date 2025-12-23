@@ -1170,12 +1170,13 @@
       if (!overlay){
         overlay = document.createElement('div'); overlay.id = 'randomOverlay';
         document.body.appendChild(overlay);
-        }
-        overlay.innerHTML = `<canvas id="confettiOverlay"></canvas><div class="randomBox"><div class="num" id="randomNum">–</div><div class="sub">กำลังเปิดกล่อง...</div></div>`;
-        // init overlay confetti context when created
-        confO = overlay.querySelector('#confettiOverlay');
-        if (confO) cctxO = confO.getContext('2d');
-        resizeConfettiOverlay();
+      }
+      overlay.innerHTML = `<canvas id="confettiOverlay"></canvas><div class="randomBox"><div class="num" id="randomNum">–</div><div class="sub">กำลังเปิดกล่อง...</div></div>`;
+      // init overlay confetti context when created
+      confO = overlay.querySelector('#confettiOverlay');
+      if (confO) cctxO = confO.getContext('2d');
+      resizeConfettiOverlay();
+
       const numEl = overlay.querySelector('#randomNum');
       overlay.classList.add('show');
       // size overlay canvas now that it's visible
