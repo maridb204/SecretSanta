@@ -1346,12 +1346,14 @@
     setupOverlay.setAttribute("aria-hidden","false");
     setupCloseBtn.style.visibility = force ? "hidden" : "visible";
     updateSetupStartState();
+    document.body.style.overflow = 'hidden';
   }
 
   function closeSetupModal(){
     setupOverlay.classList.remove("show");
     setupOverlay.setAttribute("aria-hidden","true");
     setupCloseBtn.style.visibility = "visible";
+    document.body.style.overflow = '';
   }
 
   function buildSetupGrid(){
@@ -1458,12 +1460,14 @@
     resetOverlay.classList.add("show");
     resetOverlay.setAttribute("aria-hidden","false");
     setTimeout(() => resetText.focus(), 0);
+    document.body.style.overflow = 'hidden';
   }
   function closeResetModal(){
     resetOverlay.classList.remove("show");
     resetOverlay.setAttribute("aria-hidden","true");
     resetText.value = "";
     resetConfirmBtn.disabled = true;
+    document.body.style.overflow = '';
   }
   function applyResetNow(){
     joinedPlayers = [];
