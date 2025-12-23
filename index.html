@@ -4,6 +4,9 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>คริสต์มาส 🎄 กล่องสุ่มของขวัญ (เลขผู้เล่น = เลขของขวัญ)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;700;900&family=Sarabun:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
     :root{
       /* Christmas theme colors */
@@ -15,9 +18,13 @@
       --danger:#ff6b6b; --ok:#55e5a1;
     }
     *{box-sizing:border-box}
+    /* Font for numbers - Kanit looks great with numbers */
+    .num, .n, .kpi .n, #resultText, #randomNum, .numPill, .pickPill, input[type="number"], .giftBox-btn span {
+      font-family: 'Kanit', 'Sarabun', sans-serif;
+    }
     body{
       margin:0; color:var(--txt);
-      font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, "Noto Sans Thai", sans-serif;
+      font-family: 'Sarabun', system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
       background: radial-gradient(1100px 600px at 20% 10%, #1a2d6d 0%, transparent 60%),
                   radial-gradient(900px 500px at 80% 20%, #5b1b5c 0%, transparent 60%),
                   linear-gradient(160deg, var(--bg1), var(--bg2));
@@ -435,7 +442,7 @@
       #randomOverlay .randomBox{ padding:18px; width:90vw; }
       #randomOverlay .sub{ font-size:14px; }
     }
-  </style>
+  </link>
 </head>
 
 <body>
