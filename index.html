@@ -556,6 +556,7 @@
   let availableGifts = [];   // ✅ ชุดเลขของขวัญ = joinedPlayers ที่ยังไม่ถูกเอาไป
   let removedGifts = [];     // ของขวัญที่ถูกเอาไปแล้ว
   let usedPlayers  = [];     // ผู้เล่นที่เล่นแล้ว
+  let allGiftNumbers = [];   // ลำดับเลขของขวัญทั้งหมด (เพื่อรักษาตำแหน่งเดิม)
 
   let lastGift = null;
   let lastPlayer = null;
@@ -859,9 +860,7 @@
 
   function renderGiftSelector(){
     giftSelector.innerHTML = "";
-    const allGifts = [...availableGifts];
     const usedGifts = removedGifts.map(r => r.gift);
-    const allGiftNumbers = [...availableGifts, ...usedGifts];
     
     if (allGiftNumbers.length === 0) {
       giftSelector.innerHTML = '<div class="t" style="color:var(--mut)">ไม่มีของขวัญเหลือแล้ว 🎊</div>';
@@ -1025,7 +1024,8 @@
     joinedPlayers = Array.from(setupSelection).sort((a,b)=>a-b);
 
     // ✅ รีสตาร์ทเกมให้สอดคล้อง: ของขวัญ = ชุดเดียวกัน และจำนวนเท่ากัน แต่สุ่มลำดับ
-    availableGifts = shuffle(joinedPlayers.slice()); // ของขวัญทั้งหมด = joinedPlayers (สุ่มแล้ว)
+    allGiftNumbers = shuffle(joinedPlayers.slice()); // เก็บลำดับเลขของขวัญตั้งแต่เริ่ม
+    availableGifts = allGiftNumbers.slice(); // ของขวัญที่ยังไม่ถูกเลือก
     removedGifts = [];
     usedPlayers = [];
 
@@ -1059,6 +1059,7 @@
   function applyResetNow(){
     joinedPlayers = [];
     availableGifts = [];
+    allGiftNumbers = [];
     removedGifts = [];
     usedPlayers = [];
     playerInput.value = "";
