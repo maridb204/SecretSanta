@@ -1339,13 +1339,43 @@
     return result;
   }
 
+  // Derangement: shuffle array so NO element is in its original position
+  function createDerangement(arr) {
+    const sorted = arr.slice().sort((a, b) => a - b);
+    let attempt = 0;
+    const maxAttempts = 100;
+
+    while (attempt < maxAttempts) {
+      const shuffled = shuffle(sorted.slice());
+      // Check if this is a valid derangement
+      let isValid = true;
+      for (let i = 0; i < sorted.length; i++) {
+        if (sorted[i] === shuffled[i]) {
+          isValid = false;
+          break;
+        }
+      }
+      if (isValid) {
+        console.log('[createDerangement] found valid derangement after', attempt + 1, 'attempts:', shuffled);
+        return shuffled;
+      }
+      attempt++;
+    }
+
+    // Fallback (shouldn't happen with reasonable array size): rotate by 1
+    console.warn('[createDerangement] fallback: rotating by 1');
+    const fallback = sorted.slice();
+    fallback.push(fallback.shift());
+    return fallback;
+  }
+
   function applySetupPlayers(){
     // ✅ ตั้งชุดร่วมเล่น
     joinedPlayers = Array.from(setupSelection).sort((a,b)=>a-b);
 
-    // ✅ รีสตาร์ทเกมให้สอดคล้อง: ของขวัญ = ชุดเดียวกัน และจำนวนเท่ากัน แต่สุ่มลำดับ
-    allGiftNumbers = shuffle(joinedPlayers.slice()); // เก็บลำดับเลขของขวัญตั้งแต่เริ่ม
-    availableGifts = allGiftNumbers.slice(); // ของขวัญที่ยังไม่ถูกเลือก
+    // ✅ ของขวัญ = ชุดเดียวกัน แต่สลับลำดับแบบ DERANGEMENT (ไม่มีใครได้เลขตัวเอง)
+    allGiftNumbers = createDerangement(joinedPlayers.slice());
+    availableGifts = allGiftNumbers.slice();
     removedGifts = [];
     usedPlayers = [];
 
