@@ -1093,7 +1093,7 @@
     giftSelector.innerHTML = "";
     const usedGifts = removedGifts.map(r => r.gift);
     const playerIdVal = Number(playerInput.value);
-    const hasValidPlayer = Number.isFinite(playerIdVal) && randomPlayerBtn.disabled;
+    const hasValidPlayer = Number.isFinite(playerIdVal) && joinedPlayers.length > 0;
     
     if (allGiftNumbers.length === 0) {
       giftSelector.innerHTML = '<div class="t" style="color:var(--mut)">ไม่มีของขวัญเหลือแล้ว 🎊</div>';
