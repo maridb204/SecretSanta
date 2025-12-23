@@ -615,7 +615,9 @@
   let availableGifts = [];   // ✅ ชุดเลขของขวัญ = joinedPlayers ที่ยังไม่ถูกเอาไป
   let removedGifts = [];     // ของขวัญที่ถูกเอาไปแล้ว
   let usedPlayers  = [];     // ผู้เล่นที่เล่นแล้ว
-  let allGiftNumbers = [];   // ลำดับเลขของขวัญทั้งหมด (เพื่อรักษาตำแหน่งเดิม)
+  let allGiftNumbers = [];   // ลำดับเมขของขวัญทั้งหมด (เพื่อรักษาตำแหน่งเดิม)
+  let boxToGift = {};        // mapping: กล่องไหน (เลข) -> ได้ของขวัญอะไร
+  let giftAssignment = {};   // mapping: ผู้เล่น -> ของขวัญ (pre-assigned derangement)
 
   let lastGift = null;
   let lastPlayer = null;
@@ -732,6 +734,36 @@
       [a[i], a[j]] = [a[j], a[i]];
     }
     return a;
+  }
+
+  // Derangement: สร้าง permutation ที่ไม่มีเลขไหนอยู่ในตำแหน่งเดิม
+  function createDerangement(arr) {
+    const sorted = arr.slice().sort((a, b) => a - b);
+    let attempt = 0;
+    const maxAttempts = 100;
+
+    while (attempt < maxAttempts) {
+      const shuffled = shuffle(sorted.slice());
+      // ตรวจสอบว่าไม่มีเลขไหนอยู่ในตำแหน่งเดิม
+      let isValid = true;
+      for (let i = 0; i < sorted.length; i++) {
+        if (sorted[i] === shuffled[i]) {
+          isValid = false;
+          break;
+        }
+      }
+      if (isValid) {
+        console.log('[createDerangement] สร้าง derangement สำเร็จหลังพยายาม', attempt + 1, 'ครั้ง:', shuffled);
+        return shuffled;
+      }
+      attempt++;
+    }
+
+    // Fallback: หมุนเวียนทุกตัวไป 1 ตำแหน่ง
+    console.warn('[createDerangement] ใช้ fallback: หมุนเวียนไป 1 ตำแหน่ง');
+    const fallback = sorted.slice();
+    fallback.push(fallback.shift());
+    return fallback;
   }
 
   function randomizeFirstPlayer(){
@@ -1096,7 +1128,6 @@
 
   function renderGiftSelector(){
     giftSelector.innerHTML = "";
-    const usedGifts = removedGifts.map(r => r.gift);
     const playerIdVal = Number(playerInput.value);
     const randomNotClicked = !randomPlayerBtn.disabled;
     const hasValidPlayer = Number.isFinite(playerIdVal) && joinedPlayers.length > 0 && !randomNotClicked;
@@ -1109,8 +1140,17 @@
     allGiftNumbers.forEach(giftNo => {
       const btn = document.createElement("button");
       btn.className = "giftBox-btn";
-      const isUsed = usedGifts.includes(giftNo);
-      btn.innerHTML = isUsed ? `<span style="font-size:22px; font-weight:900">${giftNo}</span>` : "🎁";
+      
+      // เช็คว่ากล่องนี้ถูกเปิดแล้วหรือยัง (มีใน boxToGift)
+      const isUsed = boxToGift.hasOwnProperty(giftNo);
+      
+      if (isUsed) {
+        // แสดงเลขของขวัญที่ได้
+        btn.innerHTML = `<span style="font-size:22px; font-weight:900">${boxToGift[giftNo]}</span>`;
+      } else {
+        btn.innerHTML = "🎁";
+      }
+      
       btn.disabled = isUsed || !hasValidPlayer;
       btn.title = isUsed ? `ได้เลือกแล้ว` : (!hasValidPlayer ? `ต้องกดสุ่มผู้เล่นคนแรก` : `เลือกกล่องของขวัญนี้`);
       btn.addEventListener("click", () => {
@@ -1140,16 +1180,14 @@
     
     setMsg("");
 
-    // สุ่มของขวัญจาก pool ที่ valid (ไม่ใช่เลขตัวเอง + ยังไม่ถูกใช้)
-    const validPool = availableGifts.filter(g => g !== playerId);
-    if (validPool.length === 0) {
-      setMsg("ไม่มีของขวัญที่เหมาะสมแล้ว (เหลือแต่เลขตัวเอง)", false);
+    // ใช้ของขวัญจาก pre-assigned derangement (รับประกันว่าไม่ใช่ของตัวเอง)
+    const actualGift = giftAssignment[playerId];
+    if (!actualGift || !availableGifts.includes(actualGift)) {
+      setMsg("เกิดข้อผิดพลาด: ไม่พบของขวัญที่กำหนดไว้", false);
+      console.error('[selectGiftBox] gift assignment error for player', playerId, '- assigned gift:', actualGift);
       return;
     }
-
-    // สุ่มของขวัญจาก pool
-    const actualGift = validPool[Math.floor(Math.random() * validPool.length)];
-    console.log('[selectGiftBox] randomly picked gift:', actualGift, 'for player:', playerId);
+    console.log('[selectGiftBox] using pre-assigned gift:', actualGift, 'for player:', playerId);
 
     setBusy(true);
     renderGiftSelector();
@@ -1182,6 +1220,9 @@
       resetBoxVisual();
       lastGift = actualGift;
       lastPlayer = playerId;
+      
+      // บันทึกว่ากล่องนี้ได้ของขวัญอะไร
+      boxToGift[selectedGiftNo] = actualGift;
 
       await wait(120);
     }
@@ -1376,11 +1417,21 @@
     // ✅ ตั้งชุดร่วมเล่น
     joinedPlayers = Array.from(setupSelection).sort((a,b)=>a-b);
 
-    // ✅ ของขวัญ = ชุดเดียวกัน (ไม่ fixed ตั้งแต่แรก, จะสุ่มตอนเปิดกล่อง)
+    // ✅ สร้าง derangement: ของขวัญ = ชุดเดียวกัน แต่ไม่มีใครได้ของตัวเอง
     allGiftNumbers = joinedPlayers.slice();
+    const deranged = createDerangement(joinedPlayers);
+    
+    // สร้าง mapping: ผู้เล่น i -> ของขวัญ deranged[i]
+    giftAssignment = {};
+    joinedPlayers.forEach((playerId, idx) => {
+      giftAssignment[playerId] = deranged[idx];
+    });
+    console.log('[applySetupPlayers] derangement mapping:', giftAssignment);
+    
     availableGifts = allGiftNumbers.slice();
     removedGifts = [];
     usedPlayers = [];
+    boxToGift = {};
 
     // เคลียร์ผล/ช่องกรอก
     playerInput.value = "";
@@ -1417,6 +1468,8 @@
     allGiftNumbers = [];
     removedGifts = [];
     usedPlayers = [];
+    boxToGift = {};
+    giftAssignment = {};
     playerInput.value = "";
     setResult(null, null);
     renderPills();
