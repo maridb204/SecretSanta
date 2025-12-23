@@ -1108,6 +1108,7 @@
       btn.title = isUsed ? `ได้เลือกแล้ว` : `เลือกกล่องของขวัญนี้`;
       btn.addEventListener("click", () => {
         if (busy || isUsed) return;
+        btn.disabled = true;
         selectGiftBox(giftNo);
       });
       giftSelector.appendChild(btn);
@@ -1128,6 +1129,7 @@
 
     const playerId = clampPlayerId();
     if (!Number.isFinite(playerId)) { console.log('[selectGiftBox] invalid player'); return; }
+    if (busy) { console.log('[selectGiftBox] busy again, abort'); return; }
     
     setMsg("");
 
