@@ -74,7 +74,7 @@
       min-height:520px;
       display:grid;
       place-items:center;
-      overflow:hidden;
+      /* overflow:hidden; */
       border-radius:16px;
       border:1px dashed rgba(255,255,255,.12);
       background:
@@ -114,21 +114,6 @@
       place-items:center;
     }
 
-    .glowBeam{
-      position:absolute;
-      width: 70%;
-      height: 70%;
-      border-radius: 50%;
-      background: radial-gradient(circle at 50% 60%,
-        rgba(255,213,74,.0) 0%,
-        rgba(255,213,74,.0) 35%,
-        rgba(255,213,74,.65) 55%,
-        rgba(255,213,74,.0) 74%);
-      opacity:0;
-      transform: translateY(18px) scale(0.8);
-      filter: blur(1px);
-      pointer-events:none;
-    }
 
     .giftBox{
       position:relative;
@@ -252,12 +237,7 @@
       70%{ transform: rotate(-48deg) translateY(-8px); }
       100%{ transform: rotate(-62deg) translateY(-10px); }
     }
-    .opening .glowBeam{ animation: glowUp 1100ms ease-out forwards; }
-    @keyframes glowUp{
-      0%{ opacity:0; transform: translateY(18px) scale(.80); }
-      45%{ opacity:1; transform: translateY(0px) scale(1.08); }
-      100%{ opacity:.85; transform: translateY(-6px) scale(1.02); }
-    }
+    /* glowBeam removed */
     .showResult .numberInside{
       opacity:1;
       transform: translate(-50%, -10px) scale(1);
@@ -467,7 +447,7 @@
           <canvas id="confetti"></canvas>
 
           <div class="boxWrap">
-            <div class="glowBeam" id="glow"></div>
+            <!-- glowBeam removed -->
 
             <div class="giftBox" id="giftBox">
               <div class="numberInside" id="numberInside">
@@ -1126,13 +1106,26 @@
 
     setBusy(true);
     try{
-      // brief spin effect inside the box (like the full-screen fake draw)
+      // 1) small box shakes for 1.5s to build suspense
+      scene.classList.add('shaking');
+      await wait(1500);
+      scene.classList.remove('shaking');
+
+      // 2) show full-screen overlay spinner / reveal (boxFakeSpin now holds for 3.5s)
       await boxFakeSpin(selectedGiftNo);
-      await openSequence(selectedGiftNo, playerId);
-      await wait(2000);
+
+      // 3) keep box visually closed but record the result so doRemove() can process
+      lastGift = selectedGiftNo;
+      lastPlayer = playerId;
+      // ensure small box shows closed state
+      resetBoxVisual();
+
+      // small pause before finalizing
+      await wait(120);
     }
     finally{
       setBusy(false);
+      // commit removal and UI updates
       doRemove();
       updatePlayerValidityUI();
       renderGiftSelector();
@@ -1175,8 +1168,8 @@
       numEl.textContent = String(target);
       // trigger overlay-specific confetti (full-screen)
       fireConfettiOverlay();
-      // keep full-screen reveal (3s) before closing
-      await wait(3000);
+      // keep full-screen reveal (3.5s) before closing
+      await wait(3500);
       overlay.classList.remove('show');
       // hide/cleanup overlay confetti after overlay closes
       clearConfettiOverlay();
