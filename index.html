@@ -1075,6 +1075,8 @@
 
       // final
       numEl.textContent = String(target);
+      // trigger confetti like opening a gift box
+      fireConfetti();
       // keep full-screen reveal (3s) before closing
       await wait(3000);
       overlay.classList.remove('show');
