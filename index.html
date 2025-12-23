@@ -248,6 +248,13 @@
       70%{ transform: rotate(-48deg) translateY(-8px); }
       100%{ transform: rotate(-62deg) translateY(-10px); }
     }
+
+    .closing .lid{ animation: closeLid 900ms cubic-bezier(.22,.88,.18,1) forwards; }
+    @keyframes closeLid{
+      0%{ transform: rotate(-62deg) translateY(-10px); }
+      30%{ transform: rotate(-48deg) translateY(-8px); }
+      100%{ transform: rotate(0deg) translateY(0); }
+    }
     /* glowBeam removed */
     .showResult .numberInside{
       opacity:1;
@@ -1130,8 +1137,13 @@
       // 3) show full-screen overlay spinner / reveal (boxFakeSpin holds for 3.5s)
       await boxFakeSpin(selectedGiftNo);
 
-      // 4) after overlay, close small box and record result for removal
+      // 4) after overlay closes, play lid closing animation (0.9s)
       scene.classList.remove('opening');
+      scene.classList.add('closing');
+      await wait(900);
+      
+      // 5) close small box and record result for removal
+      scene.classList.remove('closing');
       resetBoxVisual();
       lastGift = selectedGiftNo;
       lastPlayer = playerId;
