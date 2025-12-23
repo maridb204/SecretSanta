@@ -381,6 +381,18 @@
       background: rgba(85,229,161,.14);
       box-shadow: 0 14px 30px rgba(0,0,0,.30);
     }
+    /* Fullscreen fake-draw overlay */
+    #randomOverlay{
+      position:fixed; inset:0; display:none; align-items:center; justify-content:center;
+      background: rgba(0,0,0,0.92); z-index:9999; color:var(--txt);
+      font-family: inherit;
+    }
+    #randomOverlay.show{ display:flex; }
+    #randomOverlay .randomBox{
+      text-align:center; padding:28px; border-radius:18px; backdrop-filter: blur(6px);
+    }
+    #randomOverlay .num{ font-size: 140px; font-weight: 900; line-height:1; letter-spacing:4px; }
+    #randomOverlay .sub{ margin-top:18px; color:var(--mut); font-size:20px }
   </style>
 </head>
 
@@ -673,6 +685,58 @@
     updatePlayerValidityUI();
     // ปิดปุ่มสุ่มหลังจากใช้งานครั้งเดียว
     try{ if (randomPlayerBtn) randomPlayerBtn.disabled = true; } catch(e){}
+  }
+
+  // Fake draw: full-screen animated reveal then set player after pause
+  async function startFakeDraw(){
+    if (busy) return;
+    const availablePlayers = joinedPlayers.filter(p => !usedPlayers.includes(p));
+    if (availablePlayers.length === 0){ setMsg("ไม่มีผู้เล่นที่ยังไม่เล่น!"); return; }
+
+    // prepare overlay
+    let overlay = document.getElementById('randomOverlay');
+    if (!overlay){
+      overlay = document.createElement('div'); overlay.id = 'randomOverlay';
+      overlay.innerHTML = `<div class="randomBox"><div class="num" id="randomNum">–</div><div class="sub">กำลังสุ่มผู้เล่นคนแรก...</div></div>`;
+      document.body.appendChild(overlay);
+    }
+
+    const numEl = overlay.querySelector('#randomNum');
+    overlay.classList.add('show');
+    setBusy(true);
+
+    // cycling effect: rapid random numbers, then slow down
+    let elapsed = 0;
+    const spinDuration = 2000; // ms of spinning before settle
+    let interval = 50;
+    let iv;
+    iv = setInterval(() => {
+      const pick = availablePlayers[Math.floor(Math.random()*availablePlayers.length)];
+      numEl.textContent = String(pick);
+    }, interval);
+
+    // slow-down: increase interval progressively until spinDuration
+    const start = Date.now();
+    while (Date.now() - start < spinDuration){
+      await wait(120);
+    }
+    clearInterval(iv);
+
+    // final pick
+    const final = availablePlayers[Math.floor(Math.random()*availablePlayers.length)];
+    numEl.textContent = String(final);
+
+    // keep full-screen reveal for 5s as requested
+    await wait(5000);
+
+    overlay.classList.remove('show');
+    // set chosen player in input
+    playerInput.value = String(final);
+    setResult(null, null);
+    resetBoxVisual();
+    updatePlayerValidityUI();
+    setBusy(false);
+    // keep random button disabled (only once)
   }
 
   function highlightActivePlayerPill(playerId){
@@ -1100,7 +1164,8 @@
   removeBtn.addEventListener("click", doRemove);
   randomPlayerBtn.addEventListener("click", () => {
     if (busy) return;
-    randomizeFirstPlayer();
+    // start full-screen fake draw then set player
+    startFakeDraw();
   });
 
   setupBtn.addEventListener("click", () => openSetupModal(false));
