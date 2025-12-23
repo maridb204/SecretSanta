@@ -19,8 +19,10 @@ jobs:
       - name: Inject commit hash
         run: |
           COMMIT_SHORT=$(git rev-parse --short HEAD)
-          sed -i "s/__COMMIT_HASH__/$COMMIT_SHORT/g" index.html
+          sed -i.bak "s/__COMMIT_HASH__/$COMMIT_SHORT/g" index.html
+          rm -f index.html.bak
           echo "Injected commit hash: $COMMIT_SHORT"
+          grep "Commit:" index.html || echo "Warning: Commit hash not found in file"
 
       - name: Setup Pages
         uses: actions/configure-pages@v3
