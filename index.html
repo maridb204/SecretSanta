@@ -693,6 +693,9 @@
     const availablePlayers = joinedPlayers.filter(p => !usedPlayers.includes(p));
     if (availablePlayers.length === 0){ setMsg("ไม่มีผู้เล่นที่ยังไม่เล่น!"); return; }
 
+    // ปิดปุ่มสุ่มทันทีเมื่อเริ่มเพื่อให้กดได้ครั้งเดียว
+    try{ if (randomPlayerBtn) randomPlayerBtn.disabled = true; } catch(e){}
+
     // prepare overlay
     let overlay = document.getElementById('randomOverlay');
     if (!overlay){
