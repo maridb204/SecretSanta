@@ -1142,6 +1142,9 @@
     }
 
     setBusy(true);
+    renderGiftSelector();
+    await new Promise(r => requestAnimationFrame(r));
+    
     try{
       console.log('[selectGiftBox] starting shake/open/overlay sequence');
       // 1) shake the box to the left for suspense (0.8s, faster & stronger)
