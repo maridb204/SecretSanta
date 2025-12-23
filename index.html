@@ -339,6 +339,11 @@
       user-select:none;
       font-weight:800;
       transition: transform 120ms ease, background 120ms ease, border-color 120ms ease;
+      min-width: 48px;
+      min-height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
     .pickPill:hover{ transform: translateY(-1px) scale(1.02); border-color: rgba(255,255,255,.28); }
     .pickPill.on{
@@ -973,6 +978,12 @@
 
   // Force choose players before start
   openSetupModal(true);
+
+  // Confirm before refresh or close page
+  window.addEventListener("beforeunload", (e) => {
+    e.preventDefault();
+    e.returnValue = "";
+  });
 })();
 </script>
 </body>
