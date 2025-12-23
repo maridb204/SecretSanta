@@ -1106,11 +1106,12 @@
       const btn = document.createElement("button");
       btn.className = "giftBox-btn";
       const isUsed = usedGifts.includes(giftNo);
+      const isOwnNumber = giftNo === playerIdVal;
       btn.innerHTML = isUsed ? `<span style="font-size:22px; font-weight:900">${giftNo}</span>` : "🎁";
-      btn.disabled = isUsed || !hasValidPlayer;
-      btn.title = isUsed ? `ได้เลือกแล้ว` : (!hasValidPlayer ? `ต้องกดสุ่มผู้เล่นคนแรก` : `เลือกกล่องของขวัญนี้`);
+      btn.disabled = isUsed || isOwnNumber || !hasValidPlayer;
+      btn.title = isUsed ? `ได้เลือกแล้ว` : (isOwnNumber ? `ห้ามเลือกเลขของตัวเอง` : (!hasValidPlayer ? `ต้องกดสุ่มผู้เล่นคนแรก` : `เลือกกล่องของขวัญนี้`));
       btn.addEventListener("click", () => {
-        if (busy || isUsed || !hasValidPlayer) return;
+        if (busy || isUsed || isOwnNumber || !hasValidPlayer) return;
         btn.disabled = true;
         selectGiftBox(giftNo);
       });
