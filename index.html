@@ -1156,12 +1156,13 @@
       console.log('[selectGiftBox] starting shake/open/overlay sequence');
       // 1) shake the box to the left for suspense (0.8s, faster & stronger)
       scene.classList.add('shakeLeft');
-      await wait(800);
+      await wait(850);
       scene.classList.remove('shakeLeft');
+      await new Promise(r => requestAnimationFrame(r));
 
       // 2) open the lid locally (0.9s)
       scene.classList.add('opening');
-      await wait(900);
+      await wait(950);
       // keep lid open briefly while we show overlay
 
       // 3) show full-screen overlay spinner / reveal (boxFakeSpin holds for 3.5s)
@@ -1170,7 +1171,7 @@
       // 4) after overlay closes, play lid closing animation (0.9s)
       scene.classList.remove('opening');
       scene.classList.add('closing');
-      await wait(900);
+      await wait(950);
       
       // 5) close small box and record result for removal
       scene.classList.remove('closing');
