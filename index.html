@@ -3,14 +3,16 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>กล่องสุ่มของขวัญ (เลขผู้เล่น = เลขของขวัญ)</title>
+  <title>คริสต์มาส 🎄 กล่องสุ่มของขวัญ (เลขผู้เล่น = เลขของขวัญ)</title>
   <style>
     :root{
-      --bg1:#070b1a; --bg2:#0c1838;
-      --card: rgba(255,255,255,.07);
-      --bd: rgba(255,255,255,.14);
-      --txt:#e9ecf7; --mut:rgba(233,236,247,.78);
-      --gold:#ffd54a; --danger:#ff5c7a; --ok:#55e5a1;
+      /* Christmas theme colors */
+      --bg1:#07120b; --bg2:#11261b; /* deep green background */
+      --card: rgba(255,255,255,.04);
+      --bd: rgba(255,255,255,.08);
+      --txt:#f6f6f6; --mut:rgba(246,246,246,.78);
+      --accent-green:#2bb673; --accent-red:#d64545; --accent-gold:#ffd54a;
+      --danger:#ff6b6b; --ok:#55e5a1;
     }
     *{box-sizing:border-box}
     body{
@@ -88,10 +90,21 @@
                   radial-gradient(circle at 40% 70%, rgba(255,255,255,.06), transparent 18%),
                   radial-gradient(circle at 65% 55%, rgba(255,255,255,.06), transparent 18%);
       filter: blur(0.5px);
-      opacity:.65;
+      opacity:.75;
       animation: float 8s ease-in-out infinite;
       pointer-events:none;
     }
+
+    /* Snow overlay */
+    .snow{ position:fixed; inset:0; pointer-events:none; z-index:800; overflow:hidden }
+    .snow:after{
+      content:""; position:absolute; left:-10%; top:-50%; width:120%; height:200%;
+      background-image: radial-gradient(white 1.5px, rgba(255,255,255,0) 1.6px);
+      background-size: 12px 12px; opacity:.9; filter: drop-shadow(0 1px 1px rgba(255,255,255,.05));
+      animation: fall 12s linear infinite;
+      mix-blend-mode: screen;
+    }
+    @keyframes fall{ from{ transform: translateY(-30%) } to{ transform: translateY(130%) } }
     @keyframes float{ 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
 
     .boxWrap{
@@ -138,7 +151,7 @@
       height: 104%;
       transform: translateX(-50%);
       border-radius: 12px;
-      background: linear-gradient(180deg, rgba(255,213,74,.95), rgba(255,213,74,.60));
+      background: linear-gradient(180deg, rgba(43,182,115,.96), rgba(30,120,75,.70));
       box-shadow: inset 0 0 0 1px rgba(0,0,0,.10);
     }
     .ribbonH{
@@ -147,7 +160,7 @@
       height: 16%;
       transform: translateY(-50%);
       border-radius: 12px;
-      background: linear-gradient(180deg, rgba(255,213,74,.95), rgba(255,213,74,.60));
+      background: linear-gradient(180deg, rgba(214,69,69,.96), rgba(170,45,45,.72));
       box-shadow: inset 0 0 0 1px rgba(0,0,0,.10);
     }
     .lid{
@@ -157,7 +170,7 @@
       left: -5%;
       top: -30%;
       border-radius: 18px;
-      background: linear-gradient(180deg, rgba(255,92,122,.98), rgba(255,92,122,.70));
+      background: linear-gradient(180deg, rgba(210,60,60,.98), rgba(180,40,40,.78));
       border: 1px solid rgba(255,255,255,.18);
       transform-origin: 15% 90%;
       transform: rotate(0deg) translateY(0);
@@ -186,7 +199,7 @@
       height: 45%;
       top: 20%;
       border-radius: 999px 999px 999px 0;
-      background: linear-gradient(180deg, rgba(255,213,74,.98), rgba(255,213,74,.62));
+      background: linear-gradient(180deg, rgba(255,80,80,.98), rgba(210,40,40,.62));
       border:1px solid rgba(0,0,0,.08);
     }
     .bow:before{ left: 0; transform: rotate(-18deg); }
