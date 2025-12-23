@@ -979,32 +979,22 @@
   // Force choose players before start
   openSetupModal(true);
 
-  // Confirm before refresh or close page (Safari compatible)
-  let hasData = false;
-
-  function markDataChanged() {
-    hasData = true;
-  }
-
-  // Track when game state changes
-  document.addEventListener("click", (e) => {
-    if (e.target === openBtn || e.target === removeBtn || 
-        e.target === setupStartBtn || e.target === resetConfirmBtn) {
-      markDataChanged();
+  // Safari-compatible confirm before leaving page
+  window.onbeforeunload = function(event) {
+    // Show confirm if game has started (players are joined)
+    if (joinedPlayers.length > 0) {
+      const msg = "มีเกมที่กำลังเล่นอยู่ คุณแน่ใจหรือจะออก?";
+      event.returnValue = msg;
+      return msg;
     }
-  });
-
-  // Safari-compatible beforeunload
-  window.onbeforeunload = function() {
-    if (hasData && joinedPlayers.length > 0) {
-      return "มีข้อมูลเกมที่ยังไม่บันทึก คุณแน่ใจหรือไม่?";
-    }
+    return undefined;
   };
 
-  // Fallback for pagehide event
-  window.addEventListener("pagehide", function(e) {
-    if (hasData && joinedPlayers.length > 0 && !e.persisted) {
-      // Page is being unloaded
+  // Additional Safari fallback
+  window.addEventListener("unload", function() {
+    if (joinedPlayers.length > 0) {
+      // This may not show dialog but ensures event fires
+      console.log("Page unloading with game state");
     }
   });
 })();
