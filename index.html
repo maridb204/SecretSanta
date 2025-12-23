@@ -291,6 +291,10 @@
 
     /* Gift selection grid */
     .giftSelector{ margin-top:10px; display:grid; grid-template-columns: repeat(auto-fit, minmax(50px, 1fr)); gap:8px; }
+    .giftBox-btn{ min-height:50px; padding:0; font-size:20px; }
+    .giftBox-btn:disabled{ opacity:.35; cursor:not-allowed; }
+    .giftBox-btn{ min-height:50px; padding:0; font-size:20px; }
+    .giftBox-btn:disabled{ opacity:.35; cursor:not-allowed; }
     .giftBox-btn{ 
       aspect-ratio: 1 / 1; 
       border-radius:12px; border:2px solid rgba(255,255,255,.18);
@@ -445,6 +449,7 @@
         <div style="margin-top:10px;">
           <div class="t" style="margin-bottom:8px; color:var(--mut)">เลือกกล่องของขวัญที่ต้องการ:</div>
           <div class="giftSelector" id="giftSelector"></div>
+          <div id="historyDisplay" style="margin-top:12px; font-size:13px; color:var(--mut);"></div>
         </div>
 
         <div class="row" style="margin-top:10px; display:none;">
@@ -576,6 +581,7 @@
 
   const resultText = document.getElementById("resultText");
   const capLine2 = document.getElementById("capLine2");
+  const historyDisplay = document.getElementById("historyDisplay");
 
   // Setup modal
   const setupOverlay = document.getElementById("setupOverlay");
@@ -639,6 +645,15 @@
 
     playerInput.value = String(v);
     return v;
+  }
+
+  function shuffle(arr){
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--){
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
   }
 
   function highlightActivePlayerPill(playerId){
@@ -813,7 +828,7 @@
     }
 
     availableGifts = availableGifts.filter(v=>v!==giftNo);
-    removedGifts.push(giftNo);
+    removedGifts.push({ player: playerNo, gift: giftNo });
 
     if (!usedPlayers.includes(playerNo)) usedPlayers.push(playerNo);
 
@@ -830,27 +845,50 @@
     setMsg(`ยืนยันแล้ว ✅ ผู้เล่น ${playerNo} ได้ของขวัญหมายเลข ${giftNo}`, true);
     renderGiftSelector();
     updatePlayerValidityUI();
+    renderHistoryDisplay();
   }
 
 
+  function renderHistoryDisplay(){
+    historyDisplay.innerHTML = "";
+    if (removedGifts.length === 0) return;
+    
+    const lines = removedGifts.map((r, idx) => `✓ ผู้เล่นหมายเลข ${r.player} ได้ของขวัญเลขที่ ${r.gift}`);
+    historyDisplay.innerHTML = lines.join("<br>");
+  }
+
   function renderGiftSelector(){
     giftSelector.innerHTML = "";
-    if (availableGifts.length === 0) {
+    const allGifts = [...availableGifts];
+    const usedGifts = removedGifts.map(r => r.gift);
+    const allGiftNumbers = [...availableGifts, ...usedGifts].sort((a, b) => a - b);
+    
+    if (allGiftNumbers.length === 0) {
       giftSelector.innerHTML = '<div class="t" style="color:var(--mut)">ไม่มีของขวัญเหลือแล้ว 🎊</div>';
       return;
     }
     
-    availableGifts.forEach(giftNo => {
+    allGiftNumbers.forEach(giftNo => {
       const btn = document.createElement("button");
       btn.className = "giftBox-btn";
       btn.innerHTML = "🎁";
-      btn.title = `เลือกกล่องของขวัญนี้`;
+      const isUsed = usedGifts.includes(giftNo);
+      btn.disabled = isUsed;
+      btn.title = isUsed ? `ได้เลือกแล้ว` : `เลือกกล่องของขวัญนี้`;
       btn.addEventListener("click", () => {
-        if (busy) return;
+        if (busy || isUsed) return;
         selectGiftBox(giftNo);
       });
       giftSelector.appendChild(btn);
     });
+  }
+
+  function renderHistoryDisplay(){
+    historyDisplay.innerHTML = "";
+    if (removedGifts.length === 0) return;
+    
+    const lines = removedGifts.map((r, idx) => `✓ ผู้เล่นหมายเลข ${r.player} ได้ของขวัญเลข ${r.gift}`);
+    historyDisplay.innerHTML = lines.join("<br>");
   }
 
   async function selectGiftBox(selectedGiftNo){
@@ -972,12 +1010,22 @@
     setupStartBtn.disabled = count < 2;
   }
 
+  // Shuffle array (Fisher-Yates)
+  function shuffle(arr) {
+    const result = arr.slice();
+    for (let i = result.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [result[i], result[j]] = [result[j], result[i]];
+    }
+    return result;
+  }
+
   function applySetupPlayers(){
     // ✅ ตั้งชุดร่วมเล่น
     joinedPlayers = Array.from(setupSelection).sort((a,b)=>a-b);
 
-    // ✅ รีสตาร์ทเกมให้สอดคล้อง: ของขวัญ = ชุดเดียวกัน และจำนวนเท่ากัน
-    availableGifts = joinedPlayers.slice(); // ของขวัญทั้งหมด = joinedPlayers
+    // ✅ รีสตาร์ทเกมให้สอดคล้อง: ของขวัญ = ชุดเดียวกัน และจำนวนเท่ากัน แต่สุ่มลำดับ
+    availableGifts = shuffle(joinedPlayers.slice()); // ของขวัญทั้งหมด = joinedPlayers (สุ่มแล้ว)
     removedGifts = [];
     usedPlayers = [];
 
@@ -988,6 +1036,7 @@
 
     renderPills();
     renderGiftSelector();
+    renderHistoryDisplay();
     updatePlayerValidityUI();
     setMsg(`ตั้งค่าแล้ว ✅ ผู้ร่วมเล่น ${joinedPlayers.length} คน และของขวัญ ${joinedPlayers.length} ชิ้น`, true);
   }
@@ -1016,6 +1065,7 @@
     setResult(null, null);
     renderPills();
     renderGiftSelector();
+    renderHistoryDisplay();
     resetBoxVisual();
     updatePlayerValidityUI();
     setMsg("รีเซ็ตเรียบร้อย ✅ (กรุณาเลือกผู้ร่วมเล่นใหม่)", true);
