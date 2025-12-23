@@ -671,6 +671,8 @@
     setResult(null, null);
     resetBoxVisual();
     updatePlayerValidityUI();
+    // ปิดปุ่มสุ่มหลังจากใช้งานครั้งเดียว
+    try{ if (randomPlayerBtn) randomPlayerBtn.disabled = true; } catch(e){}
   }
 
   function highlightActivePlayerPill(playerId){
@@ -1055,6 +1057,8 @@
     renderGiftSelector();
     renderHistoryDisplay();
     updatePlayerValidityUI();
+    // เปิดใช้งานปุ่มสุ่มอีกครั้งเมื่อทำการตั้งค่าเกมใหม่
+    try{ if (randomPlayerBtn) randomPlayerBtn.disabled = false; } catch(e){}
     setMsg(`ตั้งค่าแล้ว ✅ ผู้ร่วมเล่น ${joinedPlayers.length} คน และของขวัญ ${joinedPlayers.length} ชิ้น`, true);
   }
 
@@ -1086,6 +1090,7 @@
     renderHistoryDisplay();
     resetBoxVisual();
     updatePlayerValidityUI();
+    try{ if (randomPlayerBtn) randomPlayerBtn.disabled = false; } catch(e){}
     setMsg("รีเซ็ตเรียบร้อย ✅ (กรุณาเลือกผู้ร่วมเล่นใหม่)", true);
     openSetupModal(true);
   }
