@@ -771,6 +771,14 @@
 
     setResult(null, null);
     renderPills();
+    
+    // Auto-populate next player's number with the gift number (from 2nd player onwards)
+    if (usedPlayers.length > 0 && availableGifts.length > 0) {
+      playerInput.value = String(giftNo);
+    } else {
+      playerInput.value = "";
+    }
+    
     setMsg(`ยืนยันแล้ว ✅ ผู้เล่น ${playerNo} ได้ของขวัญหมายเลข ${giftNo}`, true);
     updatePlayerValidityUI();
   }
