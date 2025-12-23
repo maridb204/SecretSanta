@@ -1125,9 +1125,10 @@
   async function selectGiftBox(selectedGiftNo){
     console.log('[selectGiftBox] selectedGiftNo=', selectedGiftNo);
     if (busy) { console.log('[selectGiftBox] busy, abort'); return; }
-    if (!updatePlayerValidityUI()) { console.log('[selectGiftBox] invalid UI state'); return; }
 
     const playerId = clampPlayerId();
+    if (!Number.isFinite(playerId)) { console.log('[selectGiftBox] invalid player'); return; }
+    
     setMsg("");
 
     // Validate: player can only get gifts that aren't their own number
@@ -1146,6 +1147,7 @@
     await new Promise(r => requestAnimationFrame(r));
     
     try{
+      updatePlayerValidityUI();
       console.log('[selectGiftBox] starting shake/open/overlay sequence');
       // 1) shake the box to the left for suspense (0.8s, faster & stronger)
       scene.classList.add('shakeLeft');
