@@ -406,7 +406,7 @@
       box-shadow: 0 40px 120px rgba(0,0,0,0.6), 0 8px 30px rgba(0,0,0,0.4);
       width: min(820px, 92vw);
       background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-      position:relative; z-index:3;
+      position:relative; z-index:1;
     }
     #randomOverlay .num{
       font-size: 180px; font-weight: 900; line-height:1; letter-spacing:6px;
@@ -428,7 +428,7 @@
       #randomOverlay .sub{ font-size:24px; }
       #randomOverlay .randomBox{ padding:48px 36px; }
     }
-    /* overlay-local confetti canvas (renders behind the number but above the background) */
+    /* overlay-local confetti canvas (renders above the box background but below the number) */
     #randomOverlay canvas#confettiOverlay{ position:absolute; inset:0; width:100%; height:100%; pointer-events:none; z-index:2; }
     /* small screens */
     @media (max-width:480px){
@@ -769,6 +769,9 @@
 
     const numEl = overlay.querySelector('#randomNum');
     overlay.classList.add('show');
+    // size overlay canvas now that it's visible
+    resizeConfettiOverlay();
+    if (confO) cctxO = confO.getContext('2d');
     setBusy(true);
 
     // cycling effect: rapid random numbers, then slow down
@@ -1155,6 +1158,9 @@
         resizeConfettiOverlay();
       const numEl = overlay.querySelector('#randomNum');
       overlay.classList.add('show');
+      // size overlay canvas now that it's visible
+      resizeConfettiOverlay();
+      if (confO) cctxO = confO.getContext('2d');
 
       const spinDuration = 1500; // ms
       const step = 80; // ms per change
