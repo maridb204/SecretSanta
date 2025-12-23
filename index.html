@@ -978,25 +978,6 @@
 
   // Force choose players before start
   openSetupModal(true);
-
-  // Safari-compatible confirm before leaving page
-  window.onbeforeunload = function(event) {
-    // Show confirm if game has started (players are joined)
-    if (joinedPlayers.length > 0) {
-      const msg = "มีเกมที่กำลังเล่นอยู่ คุณแน่ใจหรือจะออก?";
-      event.returnValue = msg;
-      return msg;
-    }
-    return undefined;
-  };
-
-  // Additional Safari fallback
-  window.addEventListener("unload", function() {
-    if (joinedPlayers.length > 0) {
-      // This may not show dialog but ensures event fires
-      console.log("Page unloading with game state");
-    }
-  });
 })();
 </script>
 </body>
