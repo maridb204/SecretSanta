@@ -1369,7 +1369,7 @@
 
   function updateSetupStartState(){
     const count = setupSelection.size;
-    setupWarn.style.display = (count >= 2) ? "none" : "block";
+    setupWarn.style.opacity = (count >= 2) ? "0.3" : "1";
     setupStartBtn.disabled = count < 2;
   }
 
