@@ -1093,7 +1093,7 @@
     giftSelector.innerHTML = "";
     const usedGifts = removedGifts.map(r => r.gift);
     const playerIdVal = Number(playerInput.value);
-    const hasValidPlayer = Number.isFinite(playerIdVal);
+    const hasValidPlayer = Number.isFinite(playerIdVal) && randomPlayerBtn.disabled;
     
     if (allGiftNumbers.length === 0) {
       giftSelector.innerHTML = '<div class="t" style="color:var(--mut)">ไม่มีของขวัญเหลือแล้ว 🎊</div>';
@@ -1106,7 +1106,7 @@
       const isUsed = usedGifts.includes(giftNo);
       btn.innerHTML = isUsed ? `<span style="font-size:22px; font-weight:900">${giftNo}</span>` : "🎁";
       btn.disabled = isUsed || !hasValidPlayer;
-      btn.title = isUsed ? `ได้เลือกแล้ว` : (!hasValidPlayer ? `ต้องเลือกผู้เล่นก่อน` : `เลือกกล่องของขวัญนี้`);
+      btn.title = isUsed ? `ได้เลือกแล้ว` : (!hasValidPlayer ? `ต้องกดสุ่มผู้เล่นหรือกรอกเลขผู้เล่นก่อน` : `เลือกกล่องของขวัญนี้`);
       btn.addEventListener("click", () => {
         if (busy || isUsed || !hasValidPlayer) return;
         btn.disabled = true;
