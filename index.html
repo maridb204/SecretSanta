@@ -1110,12 +1110,11 @@
       const btn = document.createElement("button");
       btn.className = "giftBox-btn";
       const isUsed = usedGifts.includes(giftNo);
-      const isOwnNumber = giftNo === playerIdVal;
       btn.innerHTML = isUsed ? `<span style="font-size:22px; font-weight:900">${giftNo}</span>` : "🎁";
-      btn.disabled = isUsed || isOwnNumber || !hasValidPlayer;
-      btn.title = isUsed ? `ได้เลือกแล้ว` : (isOwnNumber ? `ห้ามเลือกเลขของตัวเอง` : (!hasValidPlayer ? `ต้องกดสุ่มผู้เล่นคนแรก` : `เลือกกล่องของขวัญนี้`));
+      btn.disabled = isUsed || !hasValidPlayer;
+      btn.title = isUsed ? `ได้เลือกแล้ว` : (!hasValidPlayer ? `ต้องกดสุ่มผู้เล่นคนแรก` : `เลือกกล่องของขวัญนี้`);
       btn.addEventListener("click", () => {
-        if (busy || isUsed || isOwnNumber || !hasValidPlayer) return;
+        if (busy || isUsed || !hasValidPlayer) return;
         btn.disabled = true;
         selectGiftBox(giftNo);
       });
@@ -1141,16 +1140,16 @@
     
     setMsg("");
 
-    // Validate: player can only get gifts that aren't their own number
-    if (selectedGiftNo === playerId) {
-      setMsg("ห้ามเลือกเลขของตัวเองนะ!", false);
+    // สุ่มของขวัญจาก pool ที่ valid (ไม่ใช่เลขตัวเอง + ยังไม่ถูกใช้)
+    const validPool = availableGifts.filter(g => g !== playerId);
+    if (validPool.length === 0) {
+      setMsg("ไม่มีของขวัญที่เหมาะสมแล้ว (เหลือแต่เลขตัวเอง)", false);
       return;
     }
 
-    if (!availableGifts.includes(selectedGiftNo)) {
-      setMsg("กล่องนี้ไม่มีแล้ว!");
-      return;
-    }
+    // สุ่มของขวัญจาก pool
+    const actualGift = validPool[Math.floor(Math.random() * validPool.length)];
+    console.log('[selectGiftBox] randomly picked gift:', actualGift, 'for player:', playerId);
 
     setBusy(true);
     renderGiftSelector();
@@ -1171,7 +1170,7 @@
       // keep lid open briefly while we show overlay
 
       // 3) show full-screen overlay spinner / reveal (boxFakeSpin holds for 3.5s)
-      await boxFakeSpin(selectedGiftNo);
+      await boxFakeSpin(actualGift);
 
       // 4) after overlay closes, play lid closing animation (0.9s)
       scene.classList.remove('opening');
@@ -1181,7 +1180,7 @@
       // 5) close small box and record result for removal
       scene.classList.remove('closing');
       resetBoxVisual();
-      lastGift = selectedGiftNo;
+      lastGift = actualGift;
       lastPlayer = playerId;
 
       await wait(120);
@@ -1377,8 +1376,8 @@
     // ✅ ตั้งชุดร่วมเล่น
     joinedPlayers = Array.from(setupSelection).sort((a,b)=>a-b);
 
-    // ✅ ของขวัญ = ชุดเดียวกัน แต่สลับลำดับแบบ DERANGEMENT (ไม่มีใครได้เลขตัวเอง)
-    allGiftNumbers = createDerangement(joinedPlayers.slice());
+    // ✅ ของขวัญ = ชุดเดียวกัน (ไม่ fixed ตั้งแต่แรก, จะสุ่มตอนเปิดกล่อง)
+    allGiftNumbers = joinedPlayers.slice();
     availableGifts = allGiftNumbers.slice();
     removedGifts = [];
     usedPlayers = [];
