@@ -299,6 +299,20 @@
     }
     .numPill.gone{opacity:.45; text-decoration:line-through; cursor:not-allowed}
 
+    /* Gift selection grid */
+    .giftSelector{ margin-top:10px; display:grid; grid-template-columns: repeat(auto-fit, minmax(50px, 1fr)); gap:8px; }
+    .giftBox-btn{ 
+      aspect-ratio: 1 / 1; 
+      border-radius:12px; border:2px solid rgba(255,255,255,.18);
+      background: linear-gradient(135deg, rgba(210,60,60,.35), rgba(43,182,115,.35));
+      cursor:pointer; user-select:none; font-weight:900;
+      transition: all 140ms ease; padding:0;
+      display:grid; place-items:center; font-size:24px;
+    }
+    .giftBox-btn:hover:not(:disabled){ transform: scale(1.08); border-color: rgba(255,255,255,.35); background: linear-gradient(135deg, rgba(210,60,60,.45), rgba(43,182,115,.45)); }
+    .giftBox-btn:active:not(:disabled){ transform: scale(.95); }
+    .giftBox-btn:disabled{ opacity:.3; cursor:not-allowed; }
+
     .msg{margin-top:8px; color:var(--gold); min-height: 22px;}
     .ok{color:var(--ok)}
 
@@ -439,8 +453,13 @@
           <button id="resetBtn" class="danger">รีเซ็ตระบบ</button>
         </div>
 
-        <div class="row" style="margin-top:10px">
-          <button id="openBtn" class="primary">📦 เปิดกล่องสุ่ม</button>
+        <div style="margin-top:10px;">
+          <div class="t" style="margin-bottom:8px; color:var(--mut)">เลือกกล่องของขวัญที่ต้องการ:</div>
+          <div class="giftSelector" id="giftSelector"></div>
+        </div>
+
+        <div class="row" style="margin-top:10px; display:none;">
+          <button id="openBtn" class="primary">�� เปิดกล่องสุ่ม</button>
           <button id="removeBtn" class="danger" disabled>❌ ลบเลขนี้ออก</button>
         </div>
 
@@ -563,6 +582,8 @@
 
   const playerPillsEl = document.getElementById("playerPills");
   const giftPillsEl = document.getElementById("giftPills");
+
+  const giftSelector = document.getElementById("giftSelector");
 
   const resultText = document.getElementById("resultText");
   const capLine2 = document.getElementById("capLine2");
@@ -818,10 +839,64 @@
     }
     
     setMsg(`ยืนยันแล้ว ✅ ผู้เล่น ${playerNo} ได้ของขวัญหมายเลข ${giftNo}`, true);
+    renderGiftSelector();
     updatePlayerValidityUI();
   }
 
-  function renderPills(){
+
+  function renderGiftSelector(){
+    giftSelector.innerHTML = "";
+    if (availableGifts.length === 0) {
+      giftSelector.innerHTML = '<div class="t" style="color:var(--mut)">ไม่มีของขวัญเหลือแล้ว 🎊</div>';
+      return;
+    }
+    
+    availableGifts.forEach(giftNo => {
+      const btn = document.createElement("button");
+      btn.className = "giftBox-btn";
+      btn.innerHTML = "🎁";
+      btn.title = `เลือกกล่องของขวัญนี้`;
+      btn.addEventListener("click", () => {
+        if (busy) return;
+        selectGiftBox(giftNo);
+      });
+      giftSelector.appendChild(btn);
+    });
+  }
+
+  async function selectGiftBox(selectedGiftNo){
+    if (busy) return;
+    if (!updatePlayerValidityUI()) return;
+
+    const playerId = clampPlayerId();
+    setMsg("");
+
+    // Validate: player can only get gifts that aren't their own number
+    if (selectedGiftNo === playerId) {
+      setMsg("ห้ามเลือกเลขของตัวเองนะ!", false);
+      return;
+    }
+
+    if (!availableGifts.includes(selectedGiftNo)) {
+      setMsg("กล่องนี้ไม่มีแล้ว!");
+      return;
+    }
+
+    setBusy(true);
+    try{
+      await openSequence(selectedGiftNo, playerId);
+      await wait(2000);
+    }
+    finally{
+      setBusy(false);
+      doRemove();
+      updatePlayerValidityUI();
+      renderGiftSelector();
+    }
+  }
+
+
+    function renderPills(){
     remainEl.textContent = String(availableGifts.length);
     usedCountEl.textContent = String(usedPlayers.length);
     joinCountEl.textContent = String(joinedPlayers.length);
@@ -923,6 +998,7 @@
     resetBoxVisual();
 
     renderPills();
+    renderGiftSelector();
     updatePlayerValidityUI();
     setMsg(`ตั้งค่าแล้ว ✅ ผู้ร่วมเล่น ${joinedPlayers.length} คน และของขวัญ ${joinedPlayers.length} ชิ้น`, true);
   }
@@ -950,6 +1026,7 @@
     playerInput.value = "";
     setResult(null, null);
     renderPills();
+    renderGiftSelector();
     resetBoxVisual();
     updatePlayerValidityUI();
     setMsg("รีเซ็ตเรียบร้อย ✅ (กรุณาเลือกผู้ร่วมเล่นใหม่)", true);
