@@ -231,6 +231,17 @@
       50%{ transform: translateY(30px) rotate(1.6deg); }
       75%{ transform: translateY(30px) rotate(-1.2deg); }
     }
+
+    /* Leftward suspense shake (one-shot) */
+    .shakeLeft .giftBox{ animation: shakeLeft 1500ms ease-in-out both; }
+    @keyframes shakeLeft{
+      0%{ transform: translateY(30px) translateX(0) rotate(0deg); }
+      20%{ transform: translateY(30px) translateX(-10px) rotate(-6deg); }
+      50%{ transform: translateY(30px) translateX(-18px) rotate(6deg); }
+      80%{ transform: translateY(30px) translateX(-8px) rotate(-3deg); }
+      100%{ transform: translateY(30px) translateX(0) rotate(0deg); }
+    }
+
     .opening .lid{ animation: openLid 900ms cubic-bezier(.18,.88,.22,1) forwards; }
     @keyframes openLid{
       0%{ transform: rotate(0deg) translateY(0); }
@@ -1106,26 +1117,29 @@
 
     setBusy(true);
     try{
-      // 1) small box shakes for 1.5s to build suspense
-      scene.classList.add('shaking');
+      // 1) shake the box to the left for suspense (1.5s)
+      scene.classList.add('shakeLeft');
       await wait(1500);
-      scene.classList.remove('shaking');
+      scene.classList.remove('shakeLeft');
 
-      // 2) show full-screen overlay spinner / reveal (boxFakeSpin now holds for 3.5s)
+      // 2) open the lid locally (0.9s)
+      scene.classList.add('opening');
+      await wait(900);
+      // keep lid open briefly while we show overlay
+
+      // 3) show full-screen overlay spinner / reveal (boxFakeSpin holds for 3.5s)
       await boxFakeSpin(selectedGiftNo);
 
-      // 3) keep box visually closed but record the result so doRemove() can process
+      // 4) after overlay, close small box and record result for removal
+      scene.classList.remove('opening');
+      resetBoxVisual();
       lastGift = selectedGiftNo;
       lastPlayer = playerId;
-      // ensure small box shows closed state
-      resetBoxVisual();
 
-      // small pause before finalizing
       await wait(120);
     }
     finally{
       setBusy(false);
-      // commit removal and UI updates
       doRemove();
       updatePlayerValidityUI();
       renderGiftSelector();
