@@ -95,17 +95,7 @@
       pointer-events:none;
     }
 
-    /* Snow overlay */
-    .snow{ position:fixed; inset:0; pointer-events:none; z-index:800; overflow:hidden }
-    .snow:after{
-      content:""; position:absolute; left:-10%; top:-50%; width:120%; height:200%;
-      background-image: radial-gradient(white 1.5px, rgba(255,255,255,0) 1.6px);
-      background-size: 12px 12px; opacity:.9; filter: drop-shadow(0 1px 1px rgba(255,255,255,.05));
-      animation: fall 12s linear infinite;
-      mix-blend-mode: screen;
-    }
-    @keyframes fall{ from{ transform: translateY(-30%) } to{ transform: translateY(130%) } }
-    @keyframes float{ 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+@keyframes float{ 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
 
     /* String lights across top */
     .lights{ position:fixed; left:0; right:0; top:6px; height:36px; pointer-events:none; z-index:900; display:flex; justify-content:center; align-items:center }
@@ -391,7 +381,6 @@
 </head>
 
 <body>
-  <div class="snow" aria-hidden="true"></div>
   <div class="lights" aria-hidden="true">
     <div class="light-string">
       <!-- bulbs will be styled purely via CSS classes -->
