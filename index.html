@@ -675,9 +675,10 @@
   }
   function resizeConfettiOverlay(){
     const overlay = document.getElementById('randomOverlay');
-    if (!overlay) return;
+    console.log('[resizeConfettiOverlay] called');
+    if (!overlay) { console.log('[resizeConfettiOverlay] no overlay'); return; }
     if (!confO) confO = overlay.querySelector('#confettiOverlay');
-    if (!confO) return;
+    if (!confO) { console.log('[resizeConfettiOverlay] no confetti canvas found'); return; }
     const r = overlay.getBoundingClientRect();
     confO.width = Math.floor(r.width * devicePixelRatio);
     confO.height = Math.floor(r.height * devicePixelRatio);
@@ -687,6 +688,7 @@
   resizeConfetti();
 
   function setBusy(v){
+    console.log('[setBusy] ->', v);
     busy = v;
     if (v) openBtn.disabled = true;
     playerInput.disabled = v;
@@ -750,6 +752,7 @@
     const availablePlayers = joinedPlayers.filter(p => !usedPlayers.includes(p));
     if (availablePlayers.length === 0){ setMsg("ไม่มีผู้เล่นที่ยังไม่เล่น!"); return; }
 
+    console.log('[startFakeDraw] availablePlayers:', availablePlayers.length, availablePlayers);
     // ปิดปุ่มสุ่มทันทีเมื่อเริ่มเพื่อให้กดได้ครั้งเดียว
     try{ if (randomPlayerBtn) randomPlayerBtn.disabled = true; } catch(e){}
 
@@ -759,6 +762,7 @@
       overlay = document.createElement('div'); overlay.id = 'randomOverlay';
       overlay.innerHTML = `<canvas id="confettiOverlay"></canvas><div class="randomBox"><div class="num" id="randomNum">–</div><div class="sub">กำลังสุ่มผู้เล่นคนแรก...</div></div>`;
       document.body.appendChild(overlay);
+      console.log('[startFakeDraw] created overlay');
       // init overlay confetti canvas context
       confO = overlay.querySelector('#confettiOverlay');
       if (confO) cctxO = confO.getContext('2d');
@@ -771,6 +775,7 @@
     // size overlay canvas now that it's visible
     resizeConfettiOverlay();
     if (confO) cctxO = confO.getContext('2d');
+    console.log('[startFakeDraw] about to set busy=true and start spin');
     setBusy(true);
 
     // cycling effect: rapid random numbers, then slow down
@@ -795,16 +800,19 @@
     numEl.textContent = String(final);
     // trigger overlay confetti so it appears with the full-screen reveal
     fireConfettiOverlay();
+    console.log('[startFakeDraw] final pick ->', final);
     // keep full-screen reveal for 5s as requested
     await wait(3500);
 
     overlay.classList.remove('show');
+    console.log('[startFakeDraw] overlay closed');
     // set chosen player in input
     playerInput.value = String(final);
     setResult(null, null);
     resetBoxVisual();
     updatePlayerValidityUI();
     setBusy(false);
+    console.log('[startFakeDraw] done, busy=false');
     // keep random button disabled (only once)
   }
 
@@ -848,6 +856,7 @@
   }
 
   function setResult(giftNo, playerNo){
+    console.log('[setResult] giftNo=', giftNo, 'playerNo=', playerNo);
     lastGift = giftNo;
     lastPlayer = playerNo;
 
@@ -961,6 +970,7 @@
     }
   }
   function fireConfettiOverlay(){
+    console.log('[fireConfettiOverlay]');
     const overlay = document.getElementById('randomOverlay');
     if (!overlay) return;
     if (!confO) confO = overlay.querySelector('#confettiOverlay');
@@ -971,6 +981,7 @@
     confettiRAFO = requestAnimationFrame(drawConfettiOverlay);
   }
   function clearConfettiOverlay(){
+    console.log('[clearConfettiOverlay]');
     if (confettiRAFO) cancelAnimationFrame(confettiRAFO);
     if (cctxO && confO) cctxO.clearRect(0,0,confO.width, confO.height);
     confettiPiecesO = [];
@@ -984,6 +995,7 @@
   function wait(ms){ return new Promise(r=>setTimeout(r, ms)); }
 
   async function openSequence(giftNo, playerNo){
+    console.log('[openSequence] start gift=', giftNo, 'player=', playerNo);
     resetBoxVisual();
     setResult(null, null);
 
@@ -995,19 +1007,22 @@
     await wait(900);
 
     setResult(giftNo, playerNo);
+    console.log('[openSequence] showing result');
     fireConfetti();
     setMsg(`สุ่มได้ของขวัญหมายเลข ${giftNo} (ผู้เล่น ${playerNo}) 🎉`, true);
   }
 
   async function doOpen(){
-    if (busy) return;
-    if (!updatePlayerValidityUI()) return;
+    console.log('[doOpen] entry');
+    if (busy) { console.log('[doOpen] busy, abort'); return; }
+    if (!updatePlayerValidityUI()) { console.log('[doOpen] invalid UI state'); return; }
 
     const playerId = clampPlayerId();
     setMsg("");
 
     const pool = validGiftPool(playerId);
     if(pool.length === 0){
+      console.log('[doOpen] no valid gifts');
       setResult(null, null);
       setMsg("ตอนนี้สุ่มไม่ได้แล้ว (เหลือแต่เลขของตัวเองในของขวัญที่ยังอยู่)", false);
       openBtn.disabled = true;
@@ -1015,14 +1030,16 @@
     }
 
     const pickedGift = pool[Math.floor(Math.random()*pool.length)];
+    console.log('[doOpen] pickedGift=', pickedGift, 'for player=', playerId);
 
     setBusy(true);
     try{ 
       await openSequence(pickedGift, playerId);
       // Auto remove after 2 seconds
-      await wait(200);
+      await wait(2000);
     }
     finally{
+      console.log('[doOpen] finally: clearing busy and removing');
       setBusy(false);
       doRemove();
       updatePlayerValidityUI();
@@ -1106,8 +1123,9 @@
   }
 
   async function selectGiftBox(selectedGiftNo){
-    if (busy) return;
-    if (!updatePlayerValidityUI()) return;
+    console.log('[selectGiftBox] selectedGiftNo=', selectedGiftNo);
+    if (busy) { console.log('[selectGiftBox] busy, abort'); return; }
+    if (!updatePlayerValidityUI()) { console.log('[selectGiftBox] invalid UI state'); return; }
 
     const playerId = clampPlayerId();
     setMsg("");
@@ -1125,6 +1143,7 @@
 
     setBusy(true);
     try{
+      console.log('[selectGiftBox] starting shake/open/overlay sequence');
       // 1) shake the box to the left for suspense (0.8s, faster & stronger)
       scene.classList.add('shakeLeft');
       await wait(800);
@@ -1152,6 +1171,7 @@
       await wait(120);
     }
     finally{
+      console.log('[selectGiftBox] sequence finished; cleaning up');
       setBusy(false);
       doRemove();
       updatePlayerValidityUI();
@@ -1162,6 +1182,7 @@
   // small spin animation inside the box: cycle numbers then settle to target
   async function boxFakeSpin(target){
     try{
+      console.log('[boxFakeSpin] start, target=', target);
       const choices = allGiftNumbers.length ? allGiftNumbers.slice() : availableGifts.slice();
       if (!choices.length) return;
 
@@ -1178,6 +1199,7 @@
       resizeConfettiOverlay();
 
       const numEl = overlay.querySelector('#randomNum');
+      console.log('[boxFakeSpin] overlay shown, choices=', choices.length);
       overlay.classList.add('show');
       // size overlay canvas now that it's visible
       resizeConfettiOverlay();
@@ -1194,6 +1216,7 @@
 
       // final
       numEl.textContent = String(target);
+      console.log('[boxFakeSpin] final target displayed ->', target);
       // trigger overlay-specific confetti (full-screen)
       fireConfettiOverlay();
       // keep full-screen reveal (3.5s) before closing
@@ -1201,41 +1224,43 @@
       overlay.classList.remove('show');
       // hide/cleanup overlay confetti after overlay closes
       clearConfettiOverlay();
-    }catch(e){}
+    }catch(e){ console.error('[boxFakeSpin] error', e); }
   }
 
 
     function renderPills(){
-    remainEl.textContent = String(availableGifts.length);
-    usedCountEl.textContent = String(usedPlayers.length);
-    joinCountEl.textContent = String(joinedPlayers.length);
+      console.log('[doRemove] entry lastGift=', lastGift, 'lastPlayer=', lastPlayer);
+      if(busy) { console.log('[doRemove] busy, abort'); return; }
+      if(lastGift == null || lastPlayer == null) { console.log('[doRemove] nothing to remove'); return; }
 
-    // players: show joined set only
-    playerPillsEl.innerHTML = "";
-    const joinedSet = new Set(joinedPlayers);
-    const usedSet = new Set(usedPlayers);
+      const giftNo = lastGift;
+      const playerNo = lastPlayer;
 
-    joinedPlayers.forEach(i => {
-      const s = document.createElement("span");
-      const canPick = !usedSet.has(i);
-      s.className = "numPill" + (canPick ? " clickable" : " gone");
-      s.textContent = i;
-      s.dataset.num = String(i);
-
-      if (canPick){
-        s.title = "คลิกเพื่อเลือกเป็นเลขผู้เล่น";
-        s.addEventListener("click", () => {
-          if (busy) return;
-          playerInput.value = String(i);
-          setResult(null, null);
-          resetBoxVisual();
-          updatePlayerValidityUI();
-        });
-      } else {
-        s.title = "ผู้เล่นนี้เล่นแล้ว";
+      if(!availableGifts.includes(giftNo)){
+        setMsg("เลขของขวัญนี้ถูกเอาไปแล้ว");
+        return;
       }
-      playerPillsEl.appendChild(s);
-    });
+
+      availableGifts = availableGifts.filter(v=>v!==giftNo);
+      removedGifts.push({ player: playerNo, gift: giftNo });
+
+      if (!usedPlayers.includes(playerNo)) usedPlayers.push(playerNo);
+
+      console.log('[doRemove] removed gift=', giftNo, 'for player=', playerNo);
+      setResult(null, null);
+      renderPills();
+    
+      // Auto-populate next player's number with the gift number (from 2nd player onwards)
+      if (usedPlayers.length > 0 && availableGifts.length > 0) {
+        playerInput.value = String(giftNo);
+      } else {
+        playerInput.value = "";
+      }
+    
+      setMsg(`ยืนยันแล้ว ✅ ผู้เล่น ${playerNo} ได้ของขวัญหมายเลข ${giftNo}`, true);
+      renderGiftSelector();
+      updatePlayerValidityUI();
+      renderHistoryDisplay();
 
     // gifts: show SAME joined set; strike out removed
     giftPillsEl.innerHTML = "";
