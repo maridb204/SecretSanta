@@ -743,10 +743,10 @@
       await openSequence(pickedGift, playerId);
       // Auto remove after 2 seconds
       await wait(2000);
-      doRemove();
     }
     finally{
       setBusy(false);
+      doRemove();
       updatePlayerValidityUI();
     }
   }
