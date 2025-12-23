@@ -497,7 +497,6 @@
           <label>เลขผู้เล่น:</label>
           <input id="playerId" type="number" min="1" max="30" inputmode="numeric" placeholder="คลิกเลือกจากรายการด้านล่าง" />
           <button id="randomPlayerBtn" class="ghost" title="สุ่มเลขผู้เล่นคนแรก">🎲 สุ่ม</button>
-          <button id="resetBtn" class="danger">รีเซ็ตระบบ</button>
         </div>
 
         <div style="margin-top:10px;">
@@ -538,9 +537,11 @@
             <div class="t">ผู้เล่นที่เล่นแล้ว</div>
             <div class="n" id="usedCount">0</div>
           </div>
+        </div>
 
-          <button id="setupBtn" class="ghost">ตั้งค่าผู้เล่น</button>
-          
+        <div class="row" style="margin-top:16px; padding-top:16px; border-top:1px solid var(--bd);">
+          <button id="setupBtn" class="ghost">⚙️ ตั้งค่าผู้เล่น</button>
+          <button id="resetBtn" class="danger">🔄 รีเซ็ตระบบ</button>
         </div>
       </div>
     </div>
@@ -1285,42 +1286,38 @@
     }catch(e){ console.error('[boxFakeSpin] error', e); }
   }
 
+  function renderPills(){
+    // Update counts
+    remainEl.textContent = availableGifts.length;
+    joinCountEl.textContent = joinedPlayers.length;
+    usedCountEl.textContent = usedPlayers.length;
 
-    function renderPills(){
-      console.log('[doRemove] entry lastGift=', lastGift, 'lastPlayer=', lastPlayer);
-      if(busy) { console.log('[doRemove] busy, abort'); return; }
-      if(lastGift == null || lastPlayer == null) { console.log('[doRemove] nothing to remove'); return; }
-
-      const giftNo = lastGift;
-      const playerNo = lastPlayer;
-
-      if(!availableGifts.includes(giftNo)){
-        setMsg("เลขของขวัญนี้ถูกเอาไปแล้ว");
-        return;
-      }
-
-      availableGifts = availableGifts.filter(v=>v!==giftNo);
-      removedGifts.push({ player: playerNo, gift: giftNo });
-
-      if (!usedPlayers.includes(playerNo)) usedPlayers.push(playerNo);
-
-      console.log('[doRemove] removed gift=', giftNo, 'for player=', playerNo);
-      setResult(null, null);
-      renderPills();
+    // Players: show joined set; strike out used
+    playerPillsEl.innerHTML = "";
+    const usedSet = new Set(usedPlayers);
+    const joinedSet = new Set(joinedPlayers);
     
-      // Auto-populate next player's number with the gift number (from 2nd player onwards)
-      if (usedPlayers.length > 0 && availableGifts.length > 0) {
-        playerInput.value = String(giftNo);
-      } else {
-        playerInput.value = "";
+    joinedPlayers.forEach(i => {
+      const p = document.createElement("span");
+      const isUsed = usedSet.has(i);
+      p.className = "numPill clickable" + (isUsed ? " gone" : "");
+      p.dataset.num = i;
+      p.textContent = i;
+      p.title = isUsed ? "เล่นแล้ว" : "คลิกเพื่อเลือกผู้เล่นนี้";
+      
+      if (!isUsed) {
+        p.addEventListener("click", () => {
+          playerInput.value = String(i);
+          setResult(null, null);
+          resetBoxVisual();
+          updatePlayerValidityUI();
+        });
       }
-    
-      setMsg(`ยืนยันแล้ว ✅ ผู้เล่น ${playerNo} ได้ของขวัญหมายเลข ${giftNo}`, true);
-      renderGiftSelector();
-      updatePlayerValidityUI();
-      renderHistoryDisplay();
+      
+      playerPillsEl.appendChild(p);
+    });
 
-    // gifts: show SAME joined set; strike out removed
+    // Gifts: show SAME joined set; strike out removed
     giftPillsEl.innerHTML = "";
     const availGiftSet = new Set(availableGifts);
     joinedPlayers.forEach(i => {
