@@ -1012,19 +1012,34 @@
   // small spin animation inside the box: cycle numbers then settle to target
   async function boxFakeSpin(target){
     try{
-      const display = resultText; // show numbers here while spinning
       const choices = allGiftNumbers.length ? allGiftNumbers.slice() : availableGifts.slice();
       if (!choices.length) return;
+
+      // use the same full-screen overlay as the fake draw
+      let overlay = document.getElementById('randomOverlay');
+      if (!overlay){
+        overlay = document.createElement('div'); overlay.id = 'randomOverlay';
+        document.body.appendChild(overlay);
+      }
+      overlay.innerHTML = `<div class="randomBox"><div class="num" id="randomNum">–</div><div class="sub">กำลังเปิดกล่อง...</div></div>`;
+      const numEl = overlay.querySelector('#randomNum');
+      overlay.classList.add('show');
+
       const spinDuration = 1500; // ms
       const step = 80; // ms per change
       const start = Date.now();
       while (Date.now() - start < spinDuration){
         const pick = choices[Math.floor(Math.random() * choices.length)];
-        display.textContent = String(pick);
+        numEl.textContent = String(pick);
         await wait(step);
       }
-      display.textContent = String(target);
-      await wait(250);
+
+      // final
+      numEl.textContent = String(target);
+      // keep full-screen reveal (3s) before closing
+      await wait(3000);
+      overlay.classList.remove('show');
+      // do not toggle busy here; caller controls busy state
     }catch(e){}
   }
 
