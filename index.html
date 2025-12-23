@@ -237,7 +237,7 @@
     }
     .numberInside .cap2{ color:var(--mut); font-size:12px; margin-top:4px; }
 
-    #confetti{ position:absolute; inset:0; pointer-events:none; z-index:1; }
+    #confetti{ position:absolute; inset:0; pointer-events:none; z-index:10000; }
 
     .shaking .giftBox{ animation: shake .6s ease-in-out infinite; }
     @keyframes shake{
@@ -769,7 +769,7 @@
     numEl.textContent = String(final);
 
     // keep full-screen reveal for 5s as requested
-    await wait(5000);
+    await wait(3500);
 
     overlay.classList.remove('show');
     // set chosen player in input
