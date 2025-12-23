@@ -261,41 +261,6 @@
       100%{ transform: rotate(0deg) translateY(0); }
     }
 
-    /* Santa in main scene */
-    .sceneSanta{
-      position: absolute;
-      width: 100px;
-      height: 100px;
-      left: 5%;
-      top: 15%;
-      opacity: 0;
-      transform: scale(0) rotate(-20deg);
-      pointer-events: none;
-      z-index: 15;
-      filter: drop-shadow(0 8px 16px rgba(0,0,0,0.3));
-    }
-    .sceneSanta img{
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-    }
-    .opening .sceneSanta{
-      animation: sceneSantaPop 1s cubic-bezier(0.34, 1.56, 0.64, 1) 0.4s forwards;
-    }
-    .closing .sceneSanta{
-      animation: sceneSantaHide 0.5s ease-in forwards;
-    }
-    @keyframes sceneSantaPop{
-      0%{ opacity:0; transform: scale(0) rotate(-20deg) translateY(40px); }
-      60%{ opacity:1; transform: scale(1.2) rotate(-8deg) translateY(-10px); }
-      80%{ transform: scale(0.9) rotate(4deg) translateY(3px); }
-      100%{ opacity:1; transform: scale(1) rotate(0deg) translateY(0); }
-    }
-    @keyframes sceneSantaHide{
-      0%{ opacity:1; transform: scale(1) rotate(0deg); }
-      100%{ opacity:0; transform: scale(0) rotate(-20deg) translateY(40px); }
-    }
-
     /* glowBeam removed */
     .showResult .numberInside{
       opacity:1;
@@ -462,31 +427,6 @@
     }
     #randomOverlay .sub{ margin-top:18px; color:var(--mut); font-size:20px; font-weight:700 }
 
-    /* Santa animation */
-    #randomOverlay .santa{
-      position:absolute; 
-      width: 100px;
-      height: 100px;
-      opacity: 0;
-      transform: scale(0) rotate(-15deg);
-      animation: santaPop 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-      z-index:5;
-      filter: drop-shadow(0 6px 12px rgba(0,0,0,0.25));
-    }
-    #randomOverlay .santa img{
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-    }
-    #randomOverlay .santa.left{ left: 8%; top: 15%; animation-delay: 0.3s; }
-    #randomOverlay .santa.right{ right: 8%; top: 20%; animation-delay: 0.5s; transform: scale(0) rotate(15deg); }
-    @keyframes santaPop{
-      0%{ opacity:0; transform: scale(0) rotate(-15deg) translateY(30px); }
-      60%{ opacity:1; transform: scale(1.15) rotate(-5deg) translateY(-8px); }
-      80%{ transform: scale(0.95) rotate(3deg) translateY(2px); }
-      100%{ opacity:1; transform: scale(1) rotate(0deg) translateY(0); }
-    }
-
     /* iPad / tablet sizing */
     @media (min-width:768px) and (max-width:1024px){
       #randomOverlay .num{ font-size: 220px; -webkit-text-stroke:3px rgba(0,0,0,0.72); }
@@ -500,10 +440,6 @@
       #randomOverlay .num{ font-size: 84px; letter-spacing:2px; }
       #randomOverlay .randomBox{ padding:18px; width:90vw; }
       #randomOverlay .sub{ font-size:14px; }
-      #randomOverlay .santa{ width: 60px; height: 60px; }
-      #randomOverlay .santa.left{ left: 5%; top: 10%; }
-      #randomOverlay .santa.right{ right: 5%; top: 12%; }
-      .sceneSanta{ width: 70px; height: 70px; }
     }
   </style>
 </head>
@@ -534,7 +470,6 @@
         <div class="scene" id="scene">
           <div class="sparkle"></div>
           <canvas id="confetti"></canvas>
-          <div class="sceneSanta"><img src="https://api.iconify.design/noto:santa-claus.svg" alt="Santa"></div>
 
           <div class="boxWrap">
             <!-- glowBeam removed -->
@@ -870,7 +805,7 @@
     let overlay = document.getElementById('randomOverlay');
     if (!overlay){
       overlay = document.createElement('div'); overlay.id = 'randomOverlay';
-      overlay.innerHTML = `<canvas id="confettiOverlay"></canvas><div class="santa left"><img src="https://api.iconify.design/noto:santa-claus.svg" alt="Santa"></div><div class="santa right"><img src="https://api.iconify.design/noto:santa-claus.svg" alt="Santa"></div><div class="randomBox"><div class="num" id="randomNum">–</div><div class="sub">กำลังสุ่มผู้เล่นคนแรก...</div></div>`;
+      overlay.innerHTML = `<canvas id="confettiOverlay"></canvas><div class="randomBox"><div class="num" id="randomNum">–</div><div class="sub">กำลังสุ่มผู้เล่นคนแรก...</div></div>`;
       document.body.appendChild(overlay);
       console.log('[startFakeDraw] created overlay');
       // init overlay confetti canvas context
@@ -1322,7 +1257,7 @@
         overlay = document.createElement('div'); overlay.id = 'randomOverlay';
         document.body.appendChild(overlay);
       }
-      overlay.innerHTML = `<canvas id="confettiOverlay"></canvas><div class="santa left"><img src="https://api.iconify.design/noto:santa-claus.svg" alt="Santa"></div><div class="santa right"><img src="https://api.iconify.design/noto:santa-claus.svg" alt="Santa"></div><div class="randomBox"><div class="num" id="randomNum">–</div><div class="sub">กำลังเปิดกล่อง...</div></div>`;
+      overlay.innerHTML = `<canvas id="confettiOverlay"></canvas><div class="randomBox"><div class="num" id="randomNum">–</div><div class="sub">กำลังเปิดกล่อง...</div></div>`;
       // init overlay confetti context when created
       confO = overlay.querySelector('#confettiOverlay');
       if (confO) cctxO = confO.getContext('2d');
