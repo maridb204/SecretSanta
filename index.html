@@ -870,8 +870,9 @@
     allGiftNumbers.forEach(giftNo => {
       const btn = document.createElement("button");
       btn.className = "giftBox-btn";
-      btn.innerHTML = "🎁";
       const isUsed = usedGifts.includes(giftNo);
+      // แสดงเลข ถ้าเลือกแล้ว แสดง 🎁 ถ้ายังไม่เลือก
+      btn.innerHTML = isUsed ? `<span style="font-size:22px; font-weight:900">${giftNo}</span>` : "🎁";
       btn.disabled = isUsed;
       btn.title = isUsed ? `ได้เลือกแล้ว` : `เลือกกล่องของขวัญนี้`;
       btn.addEventListener("click", () => {
