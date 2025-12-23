@@ -442,6 +442,7 @@
         <div class="row">
           <label>เลขผู้เล่น:</label>
           <input id="playerId" type="number" min="1" max="30" inputmode="numeric" placeholder="คลิกเลือกจากรายการด้านล่าง" />
+          <button id="randomPlayerBtn" class="ghost" title="สุ่มเลขผู้เล่นคนแรก">🎲 สุ่ม</button>
           <button id="setupBtn" class="ghost">ตั้งค่าผู้เล่น</button>
           <button id="resetBtn" class="danger">รีเซ็ตระบบ</button>
         </div>
@@ -565,6 +566,7 @@
   // DOM
   const scene = document.getElementById("scene");
   const playerInput = document.getElementById("playerId");
+  const randomPlayerBtn = document.getElementById("randomPlayerBtn");
   const openBtn = document.getElementById("openBtn");
   const removeBtn = document.getElementById("removeBtn");
   const resetBtn = document.getElementById("resetBtn");
@@ -655,6 +657,20 @@
       [a[i], a[j]] = [a[j], a[i]];
     }
     return a;
+  }
+
+  function randomizeFirstPlayer(){
+    // เลือก player คนแรกจากผู้ร่วมเล่นที่ยังไม่เล่น
+    const availablePlayers = joinedPlayers.filter(p => !usedPlayers.includes(p));
+    if (availablePlayers.length === 0) {
+      setMsg("ไม่มีผู้เล่นที่ยังไม่เล่น!");
+      return;
+    }
+    const randomIndex = Math.floor(Math.random() * availablePlayers.length);
+    playerInput.value = String(availablePlayers[randomIndex]);
+    setResult(null, null);
+    resetBoxVisual();
+    updatePlayerValidityUI();
   }
 
   function highlightActivePlayerPill(playerId){
@@ -1077,6 +1093,10 @@
   // Events
   openBtn.addEventListener("click", doOpen);
   removeBtn.addEventListener("click", doRemove);
+  randomPlayerBtn.addEventListener("click", () => {
+    if (busy) return;
+    randomizeFirstPlayer();
+  });
 
   setupBtn.addEventListener("click", () => openSetupModal(false));
 
