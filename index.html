@@ -996,6 +996,8 @@
 
     setBusy(true);
     try{
+      // brief spin effect inside the box (like the full-screen fake draw)
+      await boxFakeSpin(selectedGiftNo);
       await openSequence(selectedGiftNo, playerId);
       await wait(2000);
     }
@@ -1005,6 +1007,25 @@
       updatePlayerValidityUI();
       renderGiftSelector();
     }
+  }
+
+  // small spin animation inside the box: cycle numbers then settle to target
+  async function boxFakeSpin(target){
+    try{
+      const display = resultText; // show numbers here while spinning
+      const choices = allGiftNumbers.length ? allGiftNumbers.slice() : availableGifts.slice();
+      if (!choices.length) return;
+      const spinDuration = 1500; // ms
+      const step = 80; // ms per change
+      const start = Date.now();
+      while (Date.now() - start < spinDuration){
+        const pick = choices[Math.floor(Math.random() * choices.length)];
+        display.textContent = String(pick);
+        await wait(step);
+      }
+      display.textContent = String(target);
+      await wait(250);
+    }catch(e){}
   }
 
 
