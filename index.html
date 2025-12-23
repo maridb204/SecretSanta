@@ -107,6 +107,15 @@
     @keyframes fall{ from{ transform: translateY(-30%) } to{ transform: translateY(130%) } }
     @keyframes float{ 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
 
+    /* String lights across top */
+    .lights{ position:fixed; left:0; right:0; top:6px; height:36px; pointer-events:none; z-index:900; display:flex; justify-content:center; align-items:center }
+    .light-string{ width:90%; max-width:1100px; display:flex; gap:12px; justify-content:center; align-items:center }
+    .bulb{ width:12px; height:18px; border-radius:6px; box-shadow: 0 6px 18px rgba(0,0,0,.35); transform-origin:center; animation: twinkle 2.2s infinite; }
+    .bulb.red{ background: linear-gradient(180deg,#ff6b6b,#c83b3b); box-shadow: 0 0 10px rgba(216,78,78,.9); }
+    .bulb.green{ background: linear-gradient(180deg,#33b56b,#1f7a4f); box-shadow: 0 0 10px rgba(43,182,115,.9); }
+    .bulb.gold{ background: linear-gradient(180deg,#ffd54a,#d4a11a); box-shadow: 0 0 10px rgba(255,213,74,.9); }
+    @keyframes twinkle{ 0%{transform:scale(.9); opacity:.7} 50%{transform:scale(1.08); opacity:1} 100%{transform:scale(.9); opacity:.7} }
+
     .boxWrap{
       position:relative;
       width:min(420px, 86vw);
@@ -368,6 +377,21 @@
 </head>
 
 <body>
+  <div class="snow" aria-hidden="true"></div>
+  <div class="lights" aria-hidden="true">
+    <div class="light-string">
+      <!-- bulbs will be styled purely via CSS classes -->
+      <div class="bulb red"></div>
+      <div class="bulb green"></div>
+      <div class="bulb gold"></div>
+      <div class="bulb red"></div>
+      <div class="bulb green"></div>
+      <div class="bulb gold"></div>
+      <div class="bulb red"></div>
+      <div class="bulb green"></div>
+      <div class="bulb gold"></div>
+    </div>
+  </div>
   <div class="wrap">
     <div class="top">
       <div class="title">🎁 กล่องสุ่มของขวัญ</div>
@@ -667,6 +691,7 @@
   function spawnConfetti(){
     const w = conf.width, h = conf.height;
     const count = 120;
+    const palette = [0, 30, 140]; // red, gold, green
     confettiPieces = Array.from({length:count}, () => {
       const x = Math.random() * w;
       const y = -Math.random() * h * 0.2;
@@ -675,7 +700,7 @@
       const drift = (-1 + Math.random()*2) * devicePixelRatio;
       const rot = Math.random() * Math.PI*2;
       const rotSp = (-0.15 + Math.random()*0.3);
-      const hue = Math.floor(Math.random()*360);
+      const hue = palette[Math.floor(Math.random()*palette.length)] + Math.floor(Math.random()*8 - 4);
       return {x,y,size,speed,drift,rot,rotSp,hue};
     });
   }
